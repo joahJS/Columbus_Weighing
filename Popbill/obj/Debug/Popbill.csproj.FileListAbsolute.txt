@@ -170,3 +170,12 @@ G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\obj\De
 G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\obj\Debug\Popbill.csproj.CopyComplete
 G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\obj\Debug\Popbill.dll
 G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\obj\Debug\Popbill.pdb
+C:\github\Columbus_Weighing\Popbill\bin\Debug\Popbill.dll
+C:\github\Columbus_Weighing\Popbill\bin\Debug\Popbill.pdb
+C:\github\Columbus_Weighing\Popbill\bin\Debug\Linkhub.dll
+C:\github\Columbus_Weighing\Popbill\bin\Debug\Linkhub.pdb
+C:\github\Columbus_Weighing\Popbill\obj\Debug\Popbill.csprojAssemblyReference.cache
+C:\github\Columbus_Weighing\Popbill\obj\Debug\Popbill.csproj.CoreCompileInputs.cache
+C:\github\Columbus_Weighing\Popbill\obj\Debug\Popbill.csproj.CopyComplete
+C:\github\Columbus_Weighing\Popbill\obj\Debug\Popbill.dll
+C:\github\Columbus_Weighing\Popbill\obj\Debug\Popbill.pdb

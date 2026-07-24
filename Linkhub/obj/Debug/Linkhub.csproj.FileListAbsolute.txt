@@ -111,3 +111,8 @@ G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Linkhub\obj\De
 G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Linkhub\obj\Debug\Linkhub.csproj.CoreCompileInputs.cache
 G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Linkhub\obj\Debug\Linkhub.dll
 G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Linkhub\obj\Debug\Linkhub.pdb
+C:\github\Columbus_Weighing\Linkhub\bin\Debug\Linkhub.dll
+C:\github\Columbus_Weighing\Linkhub\bin\Debug\Linkhub.pdb
+C:\github\Columbus_Weighing\Linkhub\obj\Debug\Linkhub.csproj.CoreCompileInputs.cache
+C:\github\Columbus_Weighing\Linkhub\obj\Debug\Linkhub.dll
+C:\github\Columbus_Weighing\Linkhub\obj\Debug\Linkhub.pdb
