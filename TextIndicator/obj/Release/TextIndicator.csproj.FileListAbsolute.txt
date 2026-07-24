@@ -45,3 +45,11 @@ G:\개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\TextIndicator\o
 G:\개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\TextIndicator\obj\Release\TextIndicator.csproj.CoreCompileInputs.cache
 G:\개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\TextIndicator\obj\Release\TextIndicator.dll
 G:\개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\TextIndicator\obj\Release\TextIndicator.pdb
+C:\github\Columbus_Weighing\TextIndicator\bin\Release\TextIndicator.dll
+C:\github\Columbus_Weighing\TextIndicator\bin\Release\TextIndicator.pdb
+C:\github\Columbus_Weighing\TextIndicator\obj\Release\TextIndicator.Indicator.resources
+C:\github\Columbus_Weighing\TextIndicator\obj\Release\TextIndicator.Properties.Resources.resources
+C:\github\Columbus_Weighing\TextIndicator\obj\Release\TextIndicator.csproj.GenerateResource.cache
+C:\github\Columbus_Weighing\TextIndicator\obj\Release\TextIndicator.csproj.CoreCompileInputs.cache
+C:\github\Columbus_Weighing\TextIndicator\obj\Release\TextIndicator.dll
+C:\github\Columbus_Weighing\TextIndicator\obj\Release\TextIndicator.pdb
