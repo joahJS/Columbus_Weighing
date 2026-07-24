@@ -2357,6 +2357,7 @@ namespace WeighingSystem
                                 {
                                     // 계량중량표시..
                                     indicator.Weight = weight;
+                                    indicator1.Weight = weight;
 
                                     //ERP 요청값 처리를 위하여 추가세팅
                                     Indicator_Thread.Weight = weight;
@@ -2529,6 +2530,7 @@ namespace WeighingSystem
                                 {
                                     // 계량중량표시..
                                     indicator.Weight = weight;
+                                    indicator1.Weight = weight;
 
                                     //ERP 요청값 처리를 위하여 추가세팅
                                     Indicator_Thread.Weight = weight;
@@ -5330,6 +5332,7 @@ namespace WeighingSystem
                                 // 계량중량표시..
                                 indicator.Weight = weight;
                                 indicator2.Weight = weight;
+                                indicator1.Weight = weight;
 
                                 //ERP 요청값 처리를 위하여 추가세팅
                                 Indicator_Thread.Weight = weight;
