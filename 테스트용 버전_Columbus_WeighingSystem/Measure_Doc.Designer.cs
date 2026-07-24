@@ -1,0 +1,1926 @@
+﻿namespace WeighingSystem
+{
+    partial class Measure_Doc
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary> 
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.TopMargin = new DevExpress.XtraReports.UI.TopMarginBand();
+            this.BottomMargin = new DevExpress.XtraReports.UI.BottomMarginBand();
+            this.Detail = new DevExpress.XtraReports.UI.DetailBand();
+            this.PageHeader = new DevExpress.XtraReports.UI.PageHeaderBand();
+            this.xrLabel34 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel35 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrSLINO_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel37 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel38 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel39 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel40 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel41 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel42 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel43 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel44 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel46 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel47 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel48 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel50 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrCVGNM_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrADDR_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrTELNO_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrCARNO_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrITNAM_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrRK_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrSTIME_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrFTIME_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrAWEIT_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLSPER_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrCVNAM_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrTDATE_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrCARPL_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrPLNAM_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrRWEIT_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrEWEIT_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLWEIT_2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrPic_1_1_2 = new DevExpress.XtraReports.UI.XRPictureBox();
+            this.xrPic_2_1_2 = new DevExpress.XtraReports.UI.XRPictureBox();
+            this.xrPic_2_2_2 = new DevExpress.XtraReports.UI.XRPictureBox();
+            this.xrPic_1_2_2 = new DevExpress.XtraReports.UI.XRPictureBox();
+            this.xrLabel70 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel71 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel72 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel73 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel76 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel77 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel78 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel32 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel31 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel30 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel29 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel26 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel25 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel24 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel23 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrPic_1_2_1 = new DevExpress.XtraReports.UI.XRPictureBox();
+            this.xrPic_2_2_1 = new DevExpress.XtraReports.UI.XRPictureBox();
+            this.xrPic_2_1_1 = new DevExpress.XtraReports.UI.XRPictureBox();
+            this.xrPic_1_1_1 = new DevExpress.XtraReports.UI.XRPictureBox();
+            this.xrLWEIT_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrEWEIT_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrRWEIT_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrPLNAM_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrCARPL_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrTDATE_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrCVNAM_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLSPER_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrAWEIT_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrFTIME_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrSTIME_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrRK_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrITNAM_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrCARNO_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrTELNO_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrADDR_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrCVGNM_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel19 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel18 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel17 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel16 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel15 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel13 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel12 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel11 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel10 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel9 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel8 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel7 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel6 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrSLINO_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel4 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel3 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel33 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel49 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel2 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabelGubun_1 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel5 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabelGubun_2 = new DevExpress.XtraReports.UI.XRLabel();
+            ((System.ComponentModel.ISupportInitialize)(this)).BeginInit();
+            // 
+            // TopMargin
+            // 
+            this.TopMargin.HeightF = 14F;
+            this.TopMargin.Name = "TopMargin";
+            // 
+            // BottomMargin
+            // 
+            this.BottomMargin.HeightF = 25F;
+            this.BottomMargin.Name = "BottomMargin";
+            // 
+            // Detail
+            // 
+            this.Detail.Expanded = false;
+            this.Detail.Name = "Detail";
+            // 
+            // PageHeader
+            // 
+            this.PageHeader.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[] {
+            this.xrLabelGubun_2,
+            this.xrLabel5,
+            this.xrLabelGubun_1,
+            this.xrLabel2,
+            this.xrLabel34,
+            this.xrLabel35,
+            this.xrSLINO_2,
+            this.xrLabel37,
+            this.xrLabel38,
+            this.xrLabel39,
+            this.xrLabel40,
+            this.xrLabel41,
+            this.xrLabel42,
+            this.xrLabel43,
+            this.xrLabel44,
+            this.xrLabel46,
+            this.xrLabel47,
+            this.xrLabel48,
+            this.xrLabel50,
+            this.xrCVGNM_2,
+            this.xrADDR_2,
+            this.xrTELNO_2,
+            this.xrCARNO_2,
+            this.xrITNAM_2,
+            this.xrRK_2,
+            this.xrSTIME_2,
+            this.xrFTIME_2,
+            this.xrAWEIT_2,
+            this.xrLSPER_2,
+            this.xrCVNAM_2,
+            this.xrTDATE_2,
+            this.xrCARPL_2,
+            this.xrPLNAM_2,
+            this.xrRWEIT_2,
+            this.xrEWEIT_2,
+            this.xrLWEIT_2,
+            this.xrPic_1_1_2,
+            this.xrPic_2_1_2,
+            this.xrPic_2_2_2,
+            this.xrPic_1_2_2,
+            this.xrLabel70,
+            this.xrLabel71,
+            this.xrLabel72,
+            this.xrLabel73,
+            this.xrLabel76,
+            this.xrLabel77,
+            this.xrLabel78,
+            this.xrLabel32,
+            this.xrLabel31,
+            this.xrLabel30,
+            this.xrLabel29,
+            this.xrLabel26,
+            this.xrLabel25,
+            this.xrLabel24,
+            this.xrLabel23,
+            this.xrPic_1_2_1,
+            this.xrPic_2_2_1,
+            this.xrPic_2_1_1,
+            this.xrPic_1_1_1,
+            this.xrLWEIT_1,
+            this.xrEWEIT_1,
+            this.xrRWEIT_1,
+            this.xrPLNAM_1,
+            this.xrCARPL_1,
+            this.xrTDATE_1,
+            this.xrCVNAM_1,
+            this.xrLSPER_1,
+            this.xrAWEIT_1,
+            this.xrFTIME_1,
+            this.xrSTIME_1,
+            this.xrRK_1,
+            this.xrITNAM_1,
+            this.xrCARNO_1,
+            this.xrTELNO_1,
+            this.xrADDR_1,
+            this.xrCVGNM_1,
+            this.xrLabel19,
+            this.xrLabel18,
+            this.xrLabel17,
+            this.xrLabel16,
+            this.xrLabel15,
+            this.xrLabel13,
+            this.xrLabel12,
+            this.xrLabel11,
+            this.xrLabel10,
+            this.xrLabel9,
+            this.xrLabel8,
+            this.xrLabel7,
+            this.xrLabel6,
+            this.xrSLINO_1,
+            this.xrLabel4,
+            this.xrLabel3,
+            this.xrLabel1,
+            this.xrLabel33,
+            this.xrLabel49});
+            this.PageHeader.HeightF = 750F;
+            this.PageHeader.Name = "PageHeader";
+            // 
+            // xrLabel34
+            // 
+            this.xrLabel34.Font = new System.Drawing.Font("맑은 고딕", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrLabel34.LocationFloat = new DevExpress.Utils.PointFloat(674.9164F, 44.91669F);
+            this.xrLabel34.Multiline = true;
+            this.xrLabel34.Name = "xrLabel34";
+            this.xrLabel34.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel34.SizeF = new System.Drawing.SizeF(403.125F, 45.83334F);
+            this.xrLabel34.StylePriority.UseFont = false;
+            this.xrLabel34.StylePriority.UseTextAlignment = false;
+            this.xrLabel34.Text = "계  량  증  명  서";
+            this.xrLabel34.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel35
+            // 
+            this.xrLabel35.Borders = DevExpress.XtraPrinting.BorderSide.Top;
+            this.xrLabel35.Font = new System.Drawing.Font("맑은 고딕", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrLabel35.LocationFloat = new DevExpress.Utils.PointFloat(759.7916F, 85.00004F);
+            this.xrLabel35.Multiline = true;
+            this.xrLabel35.Name = "xrLabel35";
+            this.xrLabel35.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel35.SizeF = new System.Drawing.SizeF(230F, 30F);
+            this.xrLabel35.StylePriority.UseBorders = false;
+            this.xrLabel35.StylePriority.UseFont = false;
+            this.xrLabel35.StylePriority.UseTextAlignment = false;
+            this.xrLabel35.Text = "( 제 출 용 )";
+            this.xrLabel35.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrSLINO_2
+            // 
+            this.xrSLINO_2.Borders = DevExpress.XtraPrinting.BorderSide.None;
+            this.xrSLINO_2.BorderWidth = 1F;
+            this.xrSLINO_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrSLINO_2.LocationFloat = new DevExpress.Utils.PointFloat(932.7083F, 99.70837F);
+            this.xrSLINO_2.Multiline = true;
+            this.xrSLINO_2.Name = "xrSLINO_2";
+            this.xrSLINO_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 5, 0, 0, 100F);
+            this.xrSLINO_2.SizeF = new System.Drawing.SizeF(168.6667F, 30.00001F);
+            this.xrSLINO_2.StylePriority.UseBorders = false;
+            this.xrSLINO_2.StylePriority.UseBorderWidth = false;
+            this.xrSLINO_2.StylePriority.UseFont = false;
+            this.xrSLINO_2.StylePriority.UsePadding = false;
+            this.xrSLINO_2.StylePriority.UseTextAlignment = false;
+            this.xrSLINO_2.Text = "전표번호 : ";
+            this.xrSLINO_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            // 
+            // xrLabel37
+            // 
+            this.xrLabel37.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel37.BorderWidth = 1F;
+            this.xrLabel37.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel37.LocationFloat = new DevExpress.Utils.PointFloat(651.3748F, 129.7084F);
+            this.xrLabel37.Multiline = true;
+            this.xrLabel37.Name = "xrLabel37";
+            this.xrLabel37.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel37.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel37.StylePriority.UseBorders = false;
+            this.xrLabel37.StylePriority.UseBorderWidth = false;
+            this.xrLabel37.StylePriority.UseFont = false;
+            this.xrLabel37.StylePriority.UseTextAlignment = false;
+            this.xrLabel37.Text = "계량일자";
+            this.xrLabel37.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel38
+            // 
+            this.xrLabel38.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel38.BorderWidth = 1F;
+            this.xrLabel38.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel38.LocationFloat = new DevExpress.Utils.PointFloat(651.3748F, 154.7084F);
+            this.xrLabel38.Multiline = true;
+            this.xrLabel38.Name = "xrLabel38";
+            this.xrLabel38.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel38.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel38.StylePriority.UseBorders = false;
+            this.xrLabel38.StylePriority.UseBorderWidth = false;
+            this.xrLabel38.StylePriority.UseFont = false;
+            this.xrLabel38.StylePriority.UseTextAlignment = false;
+            this.xrLabel38.Text = "차량번호";
+            this.xrLabel38.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel39
+            // 
+            this.xrLabel39.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel39.BorderWidth = 1F;
+            this.xrLabel39.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel39.LocationFloat = new DevExpress.Utils.PointFloat(651.3749F, 179.7084F);
+            this.xrLabel39.Multiline = true;
+            this.xrLabel39.Name = "xrLabel39";
+            this.xrLabel39.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel39.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel39.StylePriority.UseBorders = false;
+            this.xrLabel39.StylePriority.UseBorderWidth = false;
+            this.xrLabel39.StylePriority.UseFont = false;
+            this.xrLabel39.StylePriority.UseTextAlignment = false;
+            this.xrLabel39.Text = "거 래 처";
+            this.xrLabel39.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel40
+            // 
+            this.xrLabel40.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel40.BorderWidth = 1F;
+            this.xrLabel40.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel40.LocationFloat = new DevExpress.Utils.PointFloat(876.3749F, 154.7084F);
+            this.xrLabel40.Multiline = true;
+            this.xrLabel40.Name = "xrLabel40";
+            this.xrLabel40.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel40.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel40.StylePriority.UseBorders = false;
+            this.xrLabel40.StylePriority.UseBorderWidth = false;
+            this.xrLabel40.StylePriority.UseFont = false;
+            this.xrLabel40.StylePriority.UseTextAlignment = false;
+            this.xrLabel40.Text = "품    명";
+            this.xrLabel40.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel41
+            // 
+            this.xrLabel41.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel41.BorderWidth = 1F;
+            this.xrLabel41.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel41.LocationFloat = new DevExpress.Utils.PointFloat(651.3748F, 204.7084F);
+            this.xrLabel41.Multiline = true;
+            this.xrLabel41.Name = "xrLabel41";
+            this.xrLabel41.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel41.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel41.StylePriority.UseBorders = false;
+            this.xrLabel41.StylePriority.UseBorderWidth = false;
+            this.xrLabel41.StylePriority.UseFont = false;
+            this.xrLabel41.StylePriority.UseTextAlignment = false;
+            this.xrLabel41.Text = "총 중 량";
+            this.xrLabel41.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel42
+            // 
+            this.xrLabel42.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel42.BorderWidth = 1F;
+            this.xrLabel42.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel42.LocationFloat = new DevExpress.Utils.PointFloat(651.3748F, 229.7084F);
+            this.xrLabel42.Multiline = true;
+            this.xrLabel42.Name = "xrLabel42";
+            this.xrLabel42.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel42.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel42.StylePriority.UseBorders = false;
+            this.xrLabel42.StylePriority.UseBorderWidth = false;
+            this.xrLabel42.StylePriority.UseFont = false;
+            this.xrLabel42.StylePriority.UseTextAlignment = false;
+            this.xrLabel42.Text = "공차중량";
+            this.xrLabel42.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel43
+            // 
+            this.xrLabel43.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel43.BorderWidth = 1F;
+            this.xrLabel43.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel43.LocationFloat = new DevExpress.Utils.PointFloat(651.3748F, 254.7084F);
+            this.xrLabel43.Multiline = true;
+            this.xrLabel43.Name = "xrLabel43";
+            this.xrLabel43.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel43.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel43.StylePriority.UseBorders = false;
+            this.xrLabel43.StylePriority.UseBorderWidth = false;
+            this.xrLabel43.StylePriority.UseFont = false;
+            this.xrLabel43.StylePriority.UseTextAlignment = false;
+            this.xrLabel43.Text = "감     량";
+            this.xrLabel43.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel44
+            // 
+            this.xrLabel44.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel44.BorderWidth = 1F;
+            this.xrLabel44.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel44.LocationFloat = new DevExpress.Utils.PointFloat(651.3748F, 279.7086F);
+            this.xrLabel44.Multiline = true;
+            this.xrLabel44.Name = "xrLabel44";
+            this.xrLabel44.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel44.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel44.StylePriority.UseBorders = false;
+            this.xrLabel44.StylePriority.UseBorderWidth = false;
+            this.xrLabel44.StylePriority.UseFont = false;
+            this.xrLabel44.StylePriority.UseTextAlignment = false;
+            this.xrLabel44.Text = "실 중 량";
+            this.xrLabel44.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel46
+            // 
+            this.xrLabel46.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel46.BorderWidth = 1F;
+            this.xrLabel46.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel46.LocationFloat = new DevExpress.Utils.PointFloat(651.3748F, 304.7086F);
+            this.xrLabel46.Multiline = true;
+            this.xrLabel46.Name = "xrLabel46";
+            this.xrLabel46.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel46.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel46.StylePriority.UseBorders = false;
+            this.xrLabel46.StylePriority.UseBorderWidth = false;
+            this.xrLabel46.StylePriority.UseFont = false;
+            this.xrLabel46.StylePriority.UseTextAlignment = false;
+            this.xrLabel46.Text = "운 전 자";
+            this.xrLabel46.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel47
+            // 
+            this.xrLabel47.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel47.BorderWidth = 1F;
+            this.xrLabel47.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel47.LocationFloat = new DevExpress.Utils.PointFloat(876.3748F, 304.7086F);
+            this.xrLabel47.Multiline = true;
+            this.xrLabel47.Name = "xrLabel47";
+            this.xrLabel47.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel47.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel47.StylePriority.UseBorders = false;
+            this.xrLabel47.StylePriority.UseBorderWidth = false;
+            this.xrLabel47.StylePriority.UseFont = false;
+            this.xrLabel47.StylePriority.UseTextAlignment = false;
+            this.xrLabel47.Text = "담 당 자";
+            this.xrLabel47.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel48
+            // 
+            this.xrLabel48.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel48.BorderWidth = 1F;
+            this.xrLabel48.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel48.LocationFloat = new DevExpress.Utils.PointFloat(651.3748F, 329.7086F);
+            this.xrLabel48.Multiline = true;
+            this.xrLabel48.Name = "xrLabel48";
+            this.xrLabel48.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel48.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel48.StylePriority.UseBorders = false;
+            this.xrLabel48.StylePriority.UseBorderWidth = false;
+            this.xrLabel48.StylePriority.UseFont = false;
+            this.xrLabel48.StylePriority.UseTextAlignment = false;
+            this.xrLabel48.Text = "비     고";
+            this.xrLabel48.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel50
+            // 
+            this.xrLabel50.Borders = DevExpress.XtraPrinting.BorderSide.None;
+            this.xrLabel50.BorderWidth = 1F;
+            this.xrLabel50.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrLabel50.LocationFloat = new DevExpress.Utils.PointFloat(651.3715F, 620F);
+            this.xrLabel50.Multiline = true;
+            this.xrLabel50.Name = "xrLabel50";
+            this.xrLabel50.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrLabel50.SizeF = new System.Drawing.SizeF(279.0833F, 30F);
+            this.xrLabel50.StylePriority.UseBorders = false;
+            this.xrLabel50.StylePriority.UseBorderWidth = false;
+            this.xrLabel50.StylePriority.UseFont = false;
+            this.xrLabel50.StylePriority.UsePadding = false;
+            this.xrLabel50.StylePriority.UseTextAlignment = false;
+            this.xrLabel50.Text = "※ 상기와 같이 계량하였음을 증명함.";
+            this.xrLabel50.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrCVGNM_2
+            // 
+            this.xrCVGNM_2.Font = new System.Drawing.Font("맑은 고딕", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrCVGNM_2.LocationFloat = new DevExpress.Utils.PointFloat(674.9115F, 645F);
+            this.xrCVGNM_2.Multiline = true;
+            this.xrCVGNM_2.Name = "xrCVGNM_2";
+            this.xrCVGNM_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrCVGNM_2.SizeF = new System.Drawing.SizeF(403.125F, 45.83334F);
+            this.xrCVGNM_2.StylePriority.UseFont = false;
+            this.xrCVGNM_2.StylePriority.UseTextAlignment = false;
+            this.xrCVGNM_2.Text = "콜럼버스(주)영천지점";
+            this.xrCVGNM_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrADDR_2
+            // 
+            this.xrADDR_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrADDR_2.LocationFloat = new DevExpress.Utils.PointFloat(674.9115F, 685F);
+            this.xrADDR_2.Multiline = true;
+            this.xrADDR_2.Name = "xrADDR_2";
+            this.xrADDR_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrADDR_2.SizeF = new System.Drawing.SizeF(403.12F, 25F);
+            this.xrADDR_2.StylePriority.UseFont = false;
+            this.xrADDR_2.StylePriority.UseTextAlignment = false;
+            this.xrADDR_2.Text = "경북 영천시 영천아이시로 166-5";
+            this.xrADDR_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrTELNO_2
+            // 
+            this.xrTELNO_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrTELNO_2.LocationFloat = new DevExpress.Utils.PointFloat(674.9115F, 711.0416F);
+            this.xrTELNO_2.Multiline = true;
+            this.xrTELNO_2.Name = "xrTELNO_2";
+            this.xrTELNO_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrTELNO_2.SizeF = new System.Drawing.SizeF(403.12F, 25F);
+            this.xrTELNO_2.StylePriority.UseFont = false;
+            this.xrTELNO_2.StylePriority.UseTextAlignment = false;
+            this.xrTELNO_2.Text = "Tel : (054)337-0314    Fax : (054)337-0315";
+            this.xrTELNO_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrCARNO_2
+            // 
+            this.xrCARNO_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrCARNO_2.BorderWidth = 1F;
+            this.xrCARNO_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrCARNO_2.LocationFloat = new DevExpress.Utils.PointFloat(731.3749F, 154.7084F);
+            this.xrCARNO_2.Multiline = true;
+            this.xrCARNO_2.Name = "xrCARNO_2";
+            this.xrCARNO_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrCARNO_2.SizeF = new System.Drawing.SizeF(145F, 25F);
+            this.xrCARNO_2.StylePriority.UseBorders = false;
+            this.xrCARNO_2.StylePriority.UseBorderWidth = false;
+            this.xrCARNO_2.StylePriority.UseFont = false;
+            this.xrCARNO_2.StylePriority.UsePadding = false;
+            this.xrCARNO_2.StylePriority.UseTextAlignment = false;
+            this.xrCARNO_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrITNAM_2
+            // 
+            this.xrITNAM_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrITNAM_2.BorderWidth = 1F;
+            this.xrITNAM_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrITNAM_2.LocationFloat = new DevExpress.Utils.PointFloat(956.3749F, 154.7084F);
+            this.xrITNAM_2.Multiline = true;
+            this.xrITNAM_2.Name = "xrITNAM_2";
+            this.xrITNAM_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrITNAM_2.SizeF = new System.Drawing.SizeF(145F, 25F);
+            this.xrITNAM_2.StylePriority.UseBorders = false;
+            this.xrITNAM_2.StylePriority.UseBorderWidth = false;
+            this.xrITNAM_2.StylePriority.UseFont = false;
+            this.xrITNAM_2.StylePriority.UsePadding = false;
+            this.xrITNAM_2.StylePriority.UseTextAlignment = false;
+            this.xrITNAM_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrRK_2
+            // 
+            this.xrRK_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrRK_2.BorderWidth = 1F;
+            this.xrRK_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrRK_2.LocationFloat = new DevExpress.Utils.PointFloat(731.3749F, 329.7086F);
+            this.xrRK_2.Multiline = true;
+            this.xrRK_2.Name = "xrRK_2";
+            this.xrRK_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrRK_2.SizeF = new System.Drawing.SizeF(370F, 25F);
+            this.xrRK_2.StylePriority.UseBorders = false;
+            this.xrRK_2.StylePriority.UseBorderWidth = false;
+            this.xrRK_2.StylePriority.UseFont = false;
+            this.xrRK_2.StylePriority.UsePadding = false;
+            this.xrRK_2.StylePriority.UseTextAlignment = false;
+            this.xrRK_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrSTIME_2
+            // 
+            this.xrSTIME_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrSTIME_2.BorderWidth = 1F;
+            this.xrSTIME_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrSTIME_2.LocationFloat = new DevExpress.Utils.PointFloat(731.3749F, 229.7084F);
+            this.xrSTIME_2.Multiline = true;
+            this.xrSTIME_2.Name = "xrSTIME_2";
+            this.xrSTIME_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrSTIME_2.SizeF = new System.Drawing.SizeF(145F, 25F);
+            this.xrSTIME_2.StylePriority.UseBorders = false;
+            this.xrSTIME_2.StylePriority.UseBorderWidth = false;
+            this.xrSTIME_2.StylePriority.UseFont = false;
+            this.xrSTIME_2.StylePriority.UsePadding = false;
+            this.xrSTIME_2.StylePriority.UseTextAlignment = false;
+            this.xrSTIME_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrFTIME_2
+            // 
+            this.xrFTIME_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrFTIME_2.BorderWidth = 1F;
+            this.xrFTIME_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrFTIME_2.LocationFloat = new DevExpress.Utils.PointFloat(731.3749F, 204.7084F);
+            this.xrFTIME_2.Multiline = true;
+            this.xrFTIME_2.Name = "xrFTIME_2";
+            this.xrFTIME_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrFTIME_2.SizeF = new System.Drawing.SizeF(145F, 25F);
+            this.xrFTIME_2.StylePriority.UseBorders = false;
+            this.xrFTIME_2.StylePriority.UseBorderWidth = false;
+            this.xrFTIME_2.StylePriority.UseFont = false;
+            this.xrFTIME_2.StylePriority.UsePadding = false;
+            this.xrFTIME_2.StylePriority.UseTextAlignment = false;
+            this.xrFTIME_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrAWEIT_2
+            // 
+            this.xrAWEIT_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrAWEIT_2.BorderWidth = 1F;
+            this.xrAWEIT_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrAWEIT_2.LocationFloat = new DevExpress.Utils.PointFloat(731.3749F, 279.7084F);
+            this.xrAWEIT_2.Multiline = true;
+            this.xrAWEIT_2.Name = "xrAWEIT_2";
+            this.xrAWEIT_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 30, 0, 0, 100F);
+            this.xrAWEIT_2.SizeF = new System.Drawing.SizeF(370F, 25F);
+            this.xrAWEIT_2.StylePriority.UseBorders = false;
+            this.xrAWEIT_2.StylePriority.UseBorderWidth = false;
+            this.xrAWEIT_2.StylePriority.UseFont = false;
+            this.xrAWEIT_2.StylePriority.UsePadding = false;
+            this.xrAWEIT_2.StylePriority.UseTextAlignment = false;
+            this.xrAWEIT_2.Text = "0";
+            this.xrAWEIT_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            // 
+            // xrLSPER_2
+            // 
+            this.xrLSPER_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLSPER_2.BorderWidth = 1F;
+            this.xrLSPER_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLSPER_2.LocationFloat = new DevExpress.Utils.PointFloat(731.3749F, 254.7084F);
+            this.xrLSPER_2.Multiline = true;
+            this.xrLSPER_2.Name = "xrLSPER_2";
+            this.xrLSPER_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 30, 0, 0, 100F);
+            this.xrLSPER_2.SizeF = new System.Drawing.SizeF(145F, 25F);
+            this.xrLSPER_2.StylePriority.UseBorders = false;
+            this.xrLSPER_2.StylePriority.UseBorderWidth = false;
+            this.xrLSPER_2.StylePriority.UseFont = false;
+            this.xrLSPER_2.StylePriority.UsePadding = false;
+            this.xrLSPER_2.StylePriority.UseTextAlignment = false;
+            this.xrLSPER_2.Text = "0.00";
+            this.xrLSPER_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            // 
+            // xrCVNAM_2
+            // 
+            this.xrCVNAM_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrCVNAM_2.BorderWidth = 1F;
+            this.xrCVNAM_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrCVNAM_2.LocationFloat = new DevExpress.Utils.PointFloat(731.3749F, 179.7084F);
+            this.xrCVNAM_2.Multiline = true;
+            this.xrCVNAM_2.Name = "xrCVNAM_2";
+            this.xrCVNAM_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrCVNAM_2.SizeF = new System.Drawing.SizeF(370F, 25F);
+            this.xrCVNAM_2.StylePriority.UseBorders = false;
+            this.xrCVNAM_2.StylePriority.UseBorderWidth = false;
+            this.xrCVNAM_2.StylePriority.UseFont = false;
+            this.xrCVNAM_2.StylePriority.UsePadding = false;
+            this.xrCVNAM_2.StylePriority.UseTextAlignment = false;
+            this.xrCVNAM_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrTDATE_2
+            // 
+            this.xrTDATE_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrTDATE_2.BorderWidth = 1F;
+            this.xrTDATE_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrTDATE_2.LocationFloat = new DevExpress.Utils.PointFloat(731.3749F, 129.7084F);
+            this.xrTDATE_2.Multiline = true;
+            this.xrTDATE_2.Name = "xrTDATE_2";
+            this.xrTDATE_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrTDATE_2.SizeF = new System.Drawing.SizeF(144.9965F, 25.00002F);
+            this.xrTDATE_2.StylePriority.UseBorders = false;
+            this.xrTDATE_2.StylePriority.UseBorderWidth = false;
+            this.xrTDATE_2.StylePriority.UseFont = false;
+            this.xrTDATE_2.StylePriority.UsePadding = false;
+            this.xrTDATE_2.StylePriority.UseTextAlignment = false;
+            this.xrTDATE_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrCARPL_2
+            // 
+            this.xrCARPL_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrCARPL_2.BorderWidth = 1F;
+            this.xrCARPL_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrCARPL_2.LocationFloat = new DevExpress.Utils.PointFloat(731.3749F, 304.7086F);
+            this.xrCARPL_2.Multiline = true;
+            this.xrCARPL_2.Name = "xrCARPL_2";
+            this.xrCARPL_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrCARPL_2.SizeF = new System.Drawing.SizeF(145F, 25F);
+            this.xrCARPL_2.StylePriority.UseBorders = false;
+            this.xrCARPL_2.StylePriority.UseBorderWidth = false;
+            this.xrCARPL_2.StylePriority.UseFont = false;
+            this.xrCARPL_2.StylePriority.UsePadding = false;
+            this.xrCARPL_2.StylePriority.UseTextAlignment = false;
+            this.xrCARPL_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrPLNAM_2
+            // 
+            this.xrPLNAM_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrPLNAM_2.BorderWidth = 1F;
+            this.xrPLNAM_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrPLNAM_2.LocationFloat = new DevExpress.Utils.PointFloat(956.3749F, 304.7086F);
+            this.xrPLNAM_2.Multiline = true;
+            this.xrPLNAM_2.Name = "xrPLNAM_2";
+            this.xrPLNAM_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrPLNAM_2.SizeF = new System.Drawing.SizeF(145F, 25F);
+            this.xrPLNAM_2.StylePriority.UseBorders = false;
+            this.xrPLNAM_2.StylePriority.UseBorderWidth = false;
+            this.xrPLNAM_2.StylePriority.UseFont = false;
+            this.xrPLNAM_2.StylePriority.UsePadding = false;
+            this.xrPLNAM_2.StylePriority.UseTextAlignment = false;
+            this.xrPLNAM_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrRWEIT_2
+            // 
+            this.xrRWEIT_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrRWEIT_2.BorderWidth = 1F;
+            this.xrRWEIT_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrRWEIT_2.LocationFloat = new DevExpress.Utils.PointFloat(876.3748F, 204.7084F);
+            this.xrRWEIT_2.Multiline = true;
+            this.xrRWEIT_2.Name = "xrRWEIT_2";
+            this.xrRWEIT_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 30, 0, 0, 100F);
+            this.xrRWEIT_2.SizeF = new System.Drawing.SizeF(225F, 25F);
+            this.xrRWEIT_2.StylePriority.UseBorders = false;
+            this.xrRWEIT_2.StylePriority.UseBorderWidth = false;
+            this.xrRWEIT_2.StylePriority.UseFont = false;
+            this.xrRWEIT_2.StylePriority.UsePadding = false;
+            this.xrRWEIT_2.StylePriority.UseTextAlignment = false;
+            this.xrRWEIT_2.Text = "0";
+            this.xrRWEIT_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            // 
+            // xrEWEIT_2
+            // 
+            this.xrEWEIT_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrEWEIT_2.BorderWidth = 1F;
+            this.xrEWEIT_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrEWEIT_2.LocationFloat = new DevExpress.Utils.PointFloat(876.3782F, 229.7084F);
+            this.xrEWEIT_2.Multiline = true;
+            this.xrEWEIT_2.Name = "xrEWEIT_2";
+            this.xrEWEIT_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 30, 0, 0, 100F);
+            this.xrEWEIT_2.SizeF = new System.Drawing.SizeF(225F, 25F);
+            this.xrEWEIT_2.StylePriority.UseBorders = false;
+            this.xrEWEIT_2.StylePriority.UseBorderWidth = false;
+            this.xrEWEIT_2.StylePriority.UseFont = false;
+            this.xrEWEIT_2.StylePriority.UsePadding = false;
+            this.xrEWEIT_2.StylePriority.UseTextAlignment = false;
+            this.xrEWEIT_2.Text = "0";
+            this.xrEWEIT_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            // 
+            // xrLWEIT_2
+            // 
+            this.xrLWEIT_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLWEIT_2.BorderWidth = 1F;
+            this.xrLWEIT_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLWEIT_2.LocationFloat = new DevExpress.Utils.PointFloat(876.3781F, 254.7084F);
+            this.xrLWEIT_2.Multiline = true;
+            this.xrLWEIT_2.Name = "xrLWEIT_2";
+            this.xrLWEIT_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 30, 0, 0, 100F);
+            this.xrLWEIT_2.SizeF = new System.Drawing.SizeF(225F, 25F);
+            this.xrLWEIT_2.StylePriority.UseBorders = false;
+            this.xrLWEIT_2.StylePriority.UseBorderWidth = false;
+            this.xrLWEIT_2.StylePriority.UseFont = false;
+            this.xrLWEIT_2.StylePriority.UsePadding = false;
+            this.xrLWEIT_2.StylePriority.UseTextAlignment = false;
+            this.xrLWEIT_2.Text = "0";
+            this.xrLWEIT_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            // 
+            // xrPic_1_1_2
+            // 
+            this.xrPic_1_1_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrPic_1_1_2.BorderWidth = 1F;
+            this.xrPic_1_1_2.LocationFloat = new DevExpress.Utils.PointFloat(676.3749F, 354.7086F);
+            this.xrPic_1_1_2.Name = "xrPic_1_1_2";
+            this.xrPic_1_1_2.SizeF = new System.Drawing.SizeF(200F, 133F);
+            this.xrPic_1_1_2.Sizing = DevExpress.XtraPrinting.ImageSizeMode.StretchImage;
+            this.xrPic_1_1_2.StylePriority.UseBorders = false;
+            this.xrPic_1_1_2.StylePriority.UseBorderWidth = false;
+            // 
+            // xrPic_2_1_2
+            // 
+            this.xrPic_2_1_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrPic_2_1_2.BorderWidth = 1F;
+            this.xrPic_2_1_2.LocationFloat = new DevExpress.Utils.PointFloat(901.385F, 354.7086F);
+            this.xrPic_2_1_2.Name = "xrPic_2_1_2";
+            this.xrPic_2_1_2.SizeF = new System.Drawing.SizeF(200F, 133F);
+            this.xrPic_2_1_2.Sizing = DevExpress.XtraPrinting.ImageSizeMode.StretchImage;
+            this.xrPic_2_1_2.StylePriority.UseBorders = false;
+            this.xrPic_2_1_2.StylePriority.UseBorderWidth = false;
+            // 
+            // xrPic_2_2_2
+            // 
+            this.xrPic_2_2_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrPic_2_2_2.BorderWidth = 1F;
+            this.xrPic_2_2_2.LocationFloat = new DevExpress.Utils.PointFloat(901.3782F, 487.7086F);
+            this.xrPic_2_2_2.Name = "xrPic_2_2_2";
+            this.xrPic_2_2_2.SizeF = new System.Drawing.SizeF(200F, 132F);
+            this.xrPic_2_2_2.Sizing = DevExpress.XtraPrinting.ImageSizeMode.StretchImage;
+            this.xrPic_2_2_2.StylePriority.UseBorders = false;
+            this.xrPic_2_2_2.StylePriority.UseBorderWidth = false;
+            // 
+            // xrPic_1_2_2
+            // 
+            this.xrPic_1_2_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrPic_1_2_2.BorderWidth = 1F;
+            this.xrPic_1_2_2.LocationFloat = new DevExpress.Utils.PointFloat(676.3748F, 487.7086F);
+            this.xrPic_1_2_2.Name = "xrPic_1_2_2";
+            this.xrPic_1_2_2.SizeF = new System.Drawing.SizeF(200F, 132F);
+            this.xrPic_1_2_2.Sizing = DevExpress.XtraPrinting.ImageSizeMode.StretchImage;
+            this.xrPic_1_2_2.StylePriority.UseBorders = false;
+            this.xrPic_1_2_2.StylePriority.UseBorderWidth = false;
+            // 
+            // xrLabel70
+            // 
+            this.xrLabel70.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel70.BorderWidth = 1F;
+            this.xrLabel70.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel70.LocationFloat = new DevExpress.Utils.PointFloat(1071.792F, 204.7084F);
+            this.xrLabel70.Multiline = true;
+            this.xrLabel70.Name = "xrLabel70";
+            this.xrLabel70.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel70.SizeF = new System.Drawing.SizeF(29.58005F, 25F);
+            this.xrLabel70.StylePriority.UseBorders = false;
+            this.xrLabel70.StylePriority.UseBorderWidth = false;
+            this.xrLabel70.StylePriority.UseFont = false;
+            this.xrLabel70.StylePriority.UseTextAlignment = false;
+            this.xrLabel70.Text = "kg";
+            this.xrLabel70.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel71
+            // 
+            this.xrLabel71.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel71.BorderWidth = 1F;
+            this.xrLabel71.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel71.LocationFloat = new DevExpress.Utils.PointFloat(1071.792F, 229.7084F);
+            this.xrLabel71.Multiline = true;
+            this.xrLabel71.Name = "xrLabel71";
+            this.xrLabel71.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel71.SizeF = new System.Drawing.SizeF(29.58005F, 25F);
+            this.xrLabel71.StylePriority.UseBorders = false;
+            this.xrLabel71.StylePriority.UseBorderWidth = false;
+            this.xrLabel71.StylePriority.UseFont = false;
+            this.xrLabel71.StylePriority.UseTextAlignment = false;
+            this.xrLabel71.Text = "kg";
+            this.xrLabel71.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel72
+            // 
+            this.xrLabel72.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel72.BorderWidth = 1F;
+            this.xrLabel72.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel72.LocationFloat = new DevExpress.Utils.PointFloat(1071.792F, 254.7084F);
+            this.xrLabel72.Multiline = true;
+            this.xrLabel72.Name = "xrLabel72";
+            this.xrLabel72.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel72.SizeF = new System.Drawing.SizeF(29.58005F, 25F);
+            this.xrLabel72.StylePriority.UseBorders = false;
+            this.xrLabel72.StylePriority.UseBorderWidth = false;
+            this.xrLabel72.StylePriority.UseFont = false;
+            this.xrLabel72.StylePriority.UseTextAlignment = false;
+            this.xrLabel72.Text = "kg";
+            this.xrLabel72.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel73
+            // 
+            this.xrLabel73.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel73.BorderWidth = 1F;
+            this.xrLabel73.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel73.LocationFloat = new DevExpress.Utils.PointFloat(1071.798F, 279.7084F);
+            this.xrLabel73.Multiline = true;
+            this.xrLabel73.Name = "xrLabel73";
+            this.xrLabel73.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel73.SizeF = new System.Drawing.SizeF(29.58005F, 25F);
+            this.xrLabel73.StylePriority.UseBorders = false;
+            this.xrLabel73.StylePriority.UseBorderWidth = false;
+            this.xrLabel73.StylePriority.UseFont = false;
+            this.xrLabel73.StylePriority.UseTextAlignment = false;
+            this.xrLabel73.Text = "kg";
+            this.xrLabel73.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel76
+            // 
+            this.xrLabel76.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel76.BorderWidth = 1F;
+            this.xrLabel76.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel76.LocationFloat = new DevExpress.Utils.PointFloat(846.7913F, 254.7084F);
+            this.xrLabel76.Multiline = true;
+            this.xrLabel76.Name = "xrLabel76";
+            this.xrLabel76.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel76.SizeF = new System.Drawing.SizeF(29.58005F, 25F);
+            this.xrLabel76.StylePriority.UseBorders = false;
+            this.xrLabel76.StylePriority.UseBorderWidth = false;
+            this.xrLabel76.StylePriority.UseFont = false;
+            this.xrLabel76.StylePriority.UseTextAlignment = false;
+            this.xrLabel76.Text = "%";
+            this.xrLabel76.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel77
+            // 
+            this.xrLabel77.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.xrLabel77.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel77.BorderWidth = 1F;
+            this.xrLabel77.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrLabel77.LocationFloat = new DevExpress.Utils.PointFloat(651.3749F, 354.7086F);
+            this.xrLabel77.Multiline = true;
+            this.xrLabel77.Name = "xrLabel77";
+            this.xrLabel77.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel77.SizeF = new System.Drawing.SizeF(25F, 265.2914F);
+            this.xrLabel77.StylePriority.UseBackColor = false;
+            this.xrLabel77.StylePriority.UseBorders = false;
+            this.xrLabel77.StylePriority.UseBorderWidth = false;
+            this.xrLabel77.StylePriority.UseFont = false;
+            this.xrLabel77.StylePriority.UseTextAlignment = false;
+            this.xrLabel77.Text = "1차계근";
+            this.xrLabel77.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel78
+            // 
+            this.xrLabel78.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.xrLabel78.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel78.BorderWidth = 1F;
+            this.xrLabel78.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrLabel78.LocationFloat = new DevExpress.Utils.PointFloat(876.3782F, 354.7086F);
+            this.xrLabel78.Multiline = true;
+            this.xrLabel78.Name = "xrLabel78";
+            this.xrLabel78.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel78.SizeF = new System.Drawing.SizeF(25F, 265.2914F);
+            this.xrLabel78.StylePriority.UseBackColor = false;
+            this.xrLabel78.StylePriority.UseBorders = false;
+            this.xrLabel78.StylePriority.UseBorderWidth = false;
+            this.xrLabel78.StylePriority.UseFont = false;
+            this.xrLabel78.StylePriority.UseTextAlignment = false;
+            this.xrLabel78.Text = "2차계근";
+            this.xrLabel78.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel32
+            // 
+            this.xrLabel32.BorderDashStyle = DevExpress.XtraPrinting.BorderDashStyle.Dot;
+            this.xrLabel32.Borders = DevExpress.XtraPrinting.BorderSide.Left;
+            this.xrLabel32.BorderWidth = 1F;
+            this.xrLabel32.LocationFloat = new DevExpress.Utils.PointFloat(571.7914F, 29.70835F);
+            this.xrLabel32.Multiline = true;
+            this.xrLabel32.Name = "xrLabel32";
+            this.xrLabel32.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel32.SizeF = new System.Drawing.SizeF(10.41669F, 720.0002F);
+            this.xrLabel32.StylePriority.UseBorderDashStyle = false;
+            this.xrLabel32.StylePriority.UseBorders = false;
+            this.xrLabel32.StylePriority.UseBorderWidth = false;
+            // 
+            // xrLabel31
+            // 
+            this.xrLabel31.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.xrLabel31.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel31.BorderWidth = 1F;
+            this.xrLabel31.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrLabel31.LocationFloat = new DevExpress.Utils.PointFloat(271.5867F, 354.7086F);
+            this.xrLabel31.Multiline = true;
+            this.xrLabel31.Name = "xrLabel31";
+            this.xrLabel31.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel31.SizeF = new System.Drawing.SizeF(25F, 265.2914F);
+            this.xrLabel31.StylePriority.UseBackColor = false;
+            this.xrLabel31.StylePriority.UseBorders = false;
+            this.xrLabel31.StylePriority.UseBorderWidth = false;
+            this.xrLabel31.StylePriority.UseFont = false;
+            this.xrLabel31.StylePriority.UseTextAlignment = false;
+            this.xrLabel31.Text = "2차계근";
+            this.xrLabel31.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel30
+            // 
+            this.xrLabel30.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.xrLabel30.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel30.BorderWidth = 1F;
+            this.xrLabel30.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrLabel30.LocationFloat = new DevExpress.Utils.PointFloat(46.5834F, 354.7086F);
+            this.xrLabel30.Multiline = true;
+            this.xrLabel30.Name = "xrLabel30";
+            this.xrLabel30.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel30.SizeF = new System.Drawing.SizeF(25.00001F, 265.2914F);
+            this.xrLabel30.StylePriority.UseBackColor = false;
+            this.xrLabel30.StylePriority.UseBorders = false;
+            this.xrLabel30.StylePriority.UseBorderWidth = false;
+            this.xrLabel30.StylePriority.UseFont = false;
+            this.xrLabel30.StylePriority.UseTextAlignment = false;
+            this.xrLabel30.Text = "1차계근";
+            this.xrLabel30.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel29
+            // 
+            this.xrLabel29.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel29.BorderWidth = 1F;
+            this.xrLabel29.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel29.LocationFloat = new DevExpress.Utils.PointFloat(241.9999F, 254.7084F);
+            this.xrLabel29.Multiline = true;
+            this.xrLabel29.Name = "xrLabel29";
+            this.xrLabel29.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel29.SizeF = new System.Drawing.SizeF(29.58005F, 25F);
+            this.xrLabel29.StylePriority.UseBorders = false;
+            this.xrLabel29.StylePriority.UseBorderWidth = false;
+            this.xrLabel29.StylePriority.UseFont = false;
+            this.xrLabel29.StylePriority.UseTextAlignment = false;
+            this.xrLabel29.Text = "%";
+            this.xrLabel29.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel26
+            // 
+            this.xrLabel26.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel26.BorderWidth = 1F;
+            this.xrLabel26.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel26.LocationFloat = new DevExpress.Utils.PointFloat(467.0067F, 279.7084F);
+            this.xrLabel26.Multiline = true;
+            this.xrLabel26.Name = "xrLabel26";
+            this.xrLabel26.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel26.SizeF = new System.Drawing.SizeF(29.58005F, 25F);
+            this.xrLabel26.StylePriority.UseBorders = false;
+            this.xrLabel26.StylePriority.UseBorderWidth = false;
+            this.xrLabel26.StylePriority.UseFont = false;
+            this.xrLabel26.StylePriority.UseTextAlignment = false;
+            this.xrLabel26.Text = "kg";
+            this.xrLabel26.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel25
+            // 
+            this.xrLabel25.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel25.BorderWidth = 1F;
+            this.xrLabel25.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel25.LocationFloat = new DevExpress.Utils.PointFloat(467F, 254.7084F);
+            this.xrLabel25.Multiline = true;
+            this.xrLabel25.Name = "xrLabel25";
+            this.xrLabel25.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel25.SizeF = new System.Drawing.SizeF(29.58005F, 25F);
+            this.xrLabel25.StylePriority.UseBorders = false;
+            this.xrLabel25.StylePriority.UseBorderWidth = false;
+            this.xrLabel25.StylePriority.UseFont = false;
+            this.xrLabel25.StylePriority.UseTextAlignment = false;
+            this.xrLabel25.Text = "kg";
+            this.xrLabel25.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel24
+            // 
+            this.xrLabel24.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel24.BorderWidth = 1F;
+            this.xrLabel24.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel24.LocationFloat = new DevExpress.Utils.PointFloat(467F, 229.7084F);
+            this.xrLabel24.Multiline = true;
+            this.xrLabel24.Name = "xrLabel24";
+            this.xrLabel24.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel24.SizeF = new System.Drawing.SizeF(29.58005F, 25F);
+            this.xrLabel24.StylePriority.UseBorders = false;
+            this.xrLabel24.StylePriority.UseBorderWidth = false;
+            this.xrLabel24.StylePriority.UseFont = false;
+            this.xrLabel24.StylePriority.UseTextAlignment = false;
+            this.xrLabel24.Text = "kg";
+            this.xrLabel24.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel23
+            // 
+            this.xrLabel23.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel23.BorderWidth = 1F;
+            this.xrLabel23.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel23.LocationFloat = new DevExpress.Utils.PointFloat(467F, 204.7084F);
+            this.xrLabel23.Multiline = true;
+            this.xrLabel23.Name = "xrLabel23";
+            this.xrLabel23.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel23.SizeF = new System.Drawing.SizeF(29.58005F, 25F);
+            this.xrLabel23.StylePriority.UseBorders = false;
+            this.xrLabel23.StylePriority.UseBorderWidth = false;
+            this.xrLabel23.StylePriority.UseFont = false;
+            this.xrLabel23.StylePriority.UseTextAlignment = false;
+            this.xrLabel23.Text = "kg";
+            this.xrLabel23.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrPic_1_2_1
+            // 
+            this.xrPic_1_2_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrPic_1_2_1.BorderWidth = 1F;
+            this.xrPic_1_2_1.LocationFloat = new DevExpress.Utils.PointFloat(71.58331F, 487.7086F);
+            this.xrPic_1_2_1.Name = "xrPic_1_2_1";
+            this.xrPic_1_2_1.SizeF = new System.Drawing.SizeF(200F, 132F);
+            this.xrPic_1_2_1.Sizing = DevExpress.XtraPrinting.ImageSizeMode.StretchImage;
+            this.xrPic_1_2_1.StylePriority.UseBorders = false;
+            this.xrPic_1_2_1.StylePriority.UseBorderWidth = false;
+            // 
+            // xrPic_2_2_1
+            // 
+            this.xrPic_2_2_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrPic_2_2_1.BorderWidth = 1F;
+            this.xrPic_2_2_1.LocationFloat = new DevExpress.Utils.PointFloat(296.5868F, 487.7086F);
+            this.xrPic_2_2_1.Name = "xrPic_2_2_1";
+            this.xrPic_2_2_1.SizeF = new System.Drawing.SizeF(200F, 132F);
+            this.xrPic_2_2_1.Sizing = DevExpress.XtraPrinting.ImageSizeMode.StretchImage;
+            this.xrPic_2_2_1.StylePriority.UseBorders = false;
+            this.xrPic_2_2_1.StylePriority.UseBorderWidth = false;
+            // 
+            // xrPic_2_1_1
+            // 
+            this.xrPic_2_1_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrPic_2_1_1.BorderWidth = 1F;
+            this.xrPic_2_1_1.LocationFloat = new DevExpress.Utils.PointFloat(296.5935F, 354.7086F);
+            this.xrPic_2_1_1.Name = "xrPic_2_1_1";
+            this.xrPic_2_1_1.SizeF = new System.Drawing.SizeF(200F, 133F);
+            this.xrPic_2_1_1.Sizing = DevExpress.XtraPrinting.ImageSizeMode.StretchImage;
+            this.xrPic_2_1_1.StylePriority.UseBorders = false;
+            this.xrPic_2_1_1.StylePriority.UseBorderWidth = false;
+            // 
+            // xrPic_1_1_1
+            // 
+            this.xrPic_1_1_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrPic_1_1_1.BorderWidth = 1F;
+            this.xrPic_1_1_1.LocationFloat = new DevExpress.Utils.PointFloat(71.5834F, 354.7086F);
+            this.xrPic_1_1_1.Name = "xrPic_1_1_1";
+            this.xrPic_1_1_1.SizeF = new System.Drawing.SizeF(200F, 133F);
+            this.xrPic_1_1_1.Sizing = DevExpress.XtraPrinting.ImageSizeMode.StretchImage;
+            this.xrPic_1_1_1.StylePriority.UseBorders = false;
+            this.xrPic_1_1_1.StylePriority.UseBorderWidth = false;
+            // 
+            // xrLWEIT_1
+            // 
+            this.xrLWEIT_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLWEIT_1.BorderWidth = 1F;
+            this.xrLWEIT_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLWEIT_1.LocationFloat = new DevExpress.Utils.PointFloat(271.5866F, 254.7084F);
+            this.xrLWEIT_1.Multiline = true;
+            this.xrLWEIT_1.Name = "xrLWEIT_1";
+            this.xrLWEIT_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 30, 0, 0, 100F);
+            this.xrLWEIT_1.SizeF = new System.Drawing.SizeF(225F, 25F);
+            this.xrLWEIT_1.StylePriority.UseBorders = false;
+            this.xrLWEIT_1.StylePriority.UseBorderWidth = false;
+            this.xrLWEIT_1.StylePriority.UseFont = false;
+            this.xrLWEIT_1.StylePriority.UsePadding = false;
+            this.xrLWEIT_1.StylePriority.UseTextAlignment = false;
+            this.xrLWEIT_1.Text = "0";
+            this.xrLWEIT_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            // 
+            // xrEWEIT_1
+            // 
+            this.xrEWEIT_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrEWEIT_1.BorderWidth = 1F;
+            this.xrEWEIT_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrEWEIT_1.LocationFloat = new DevExpress.Utils.PointFloat(271.5867F, 229.7084F);
+            this.xrEWEIT_1.Multiline = true;
+            this.xrEWEIT_1.Name = "xrEWEIT_1";
+            this.xrEWEIT_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 30, 0, 0, 100F);
+            this.xrEWEIT_1.SizeF = new System.Drawing.SizeF(225F, 25F);
+            this.xrEWEIT_1.StylePriority.UseBorders = false;
+            this.xrEWEIT_1.StylePriority.UseBorderWidth = false;
+            this.xrEWEIT_1.StylePriority.UseFont = false;
+            this.xrEWEIT_1.StylePriority.UsePadding = false;
+            this.xrEWEIT_1.StylePriority.UseTextAlignment = false;
+            this.xrEWEIT_1.Text = "0";
+            this.xrEWEIT_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            // 
+            // xrRWEIT_1
+            // 
+            this.xrRWEIT_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrRWEIT_1.BorderWidth = 1F;
+            this.xrRWEIT_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrRWEIT_1.LocationFloat = new DevExpress.Utils.PointFloat(271.5833F, 204.7084F);
+            this.xrRWEIT_1.Multiline = true;
+            this.xrRWEIT_1.Name = "xrRWEIT_1";
+            this.xrRWEIT_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 30, 0, 0, 100F);
+            this.xrRWEIT_1.SizeF = new System.Drawing.SizeF(225F, 25F);
+            this.xrRWEIT_1.StylePriority.UseBorders = false;
+            this.xrRWEIT_1.StylePriority.UseBorderWidth = false;
+            this.xrRWEIT_1.StylePriority.UseFont = false;
+            this.xrRWEIT_1.StylePriority.UsePadding = false;
+            this.xrRWEIT_1.StylePriority.UseTextAlignment = false;
+            this.xrRWEIT_1.Text = "0";
+            this.xrRWEIT_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            // 
+            // xrPLNAM_1
+            // 
+            this.xrPLNAM_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrPLNAM_1.BorderWidth = 1F;
+            this.xrPLNAM_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrPLNAM_1.LocationFloat = new DevExpress.Utils.PointFloat(351.5834F, 304.7086F);
+            this.xrPLNAM_1.Multiline = true;
+            this.xrPLNAM_1.Name = "xrPLNAM_1";
+            this.xrPLNAM_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrPLNAM_1.SizeF = new System.Drawing.SizeF(145F, 25F);
+            this.xrPLNAM_1.StylePriority.UseBorders = false;
+            this.xrPLNAM_1.StylePriority.UseBorderWidth = false;
+            this.xrPLNAM_1.StylePriority.UseFont = false;
+            this.xrPLNAM_1.StylePriority.UsePadding = false;
+            this.xrPLNAM_1.StylePriority.UseTextAlignment = false;
+            this.xrPLNAM_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrCARPL_1
+            // 
+            this.xrCARPL_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrCARPL_1.BorderWidth = 1F;
+            this.xrCARPL_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrCARPL_1.LocationFloat = new DevExpress.Utils.PointFloat(126.5833F, 304.7086F);
+            this.xrCARPL_1.Multiline = true;
+            this.xrCARPL_1.Name = "xrCARPL_1";
+            this.xrCARPL_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrCARPL_1.SizeF = new System.Drawing.SizeF(145F, 25F);
+            this.xrCARPL_1.StylePriority.UseBorders = false;
+            this.xrCARPL_1.StylePriority.UseBorderWidth = false;
+            this.xrCARPL_1.StylePriority.UseFont = false;
+            this.xrCARPL_1.StylePriority.UsePadding = false;
+            this.xrCARPL_1.StylePriority.UseTextAlignment = false;
+            this.xrCARPL_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrTDATE_1
+            // 
+            this.xrTDATE_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrTDATE_1.BorderWidth = 1F;
+            this.xrTDATE_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrTDATE_1.LocationFloat = new DevExpress.Utils.PointFloat(126.5834F, 129.7084F);
+            this.xrTDATE_1.Multiline = true;
+            this.xrTDATE_1.Name = "xrTDATE_1";
+            this.xrTDATE_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrTDATE_1.SizeF = new System.Drawing.SizeF(144.9966F, 25.00002F);
+            this.xrTDATE_1.StylePriority.UseBorders = false;
+            this.xrTDATE_1.StylePriority.UseBorderWidth = false;
+            this.xrTDATE_1.StylePriority.UseFont = false;
+            this.xrTDATE_1.StylePriority.UsePadding = false;
+            this.xrTDATE_1.StylePriority.UseTextAlignment = false;
+            this.xrTDATE_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrCVNAM_1
+            // 
+            this.xrCVNAM_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrCVNAM_1.BorderWidth = 1F;
+            this.xrCVNAM_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrCVNAM_1.LocationFloat = new DevExpress.Utils.PointFloat(126.5834F, 179.7084F);
+            this.xrCVNAM_1.Multiline = true;
+            this.xrCVNAM_1.Name = "xrCVNAM_1";
+            this.xrCVNAM_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrCVNAM_1.SizeF = new System.Drawing.SizeF(370F, 25F);
+            this.xrCVNAM_1.StylePriority.UseBorders = false;
+            this.xrCVNAM_1.StylePriority.UseBorderWidth = false;
+            this.xrCVNAM_1.StylePriority.UseFont = false;
+            this.xrCVNAM_1.StylePriority.UsePadding = false;
+            this.xrCVNAM_1.StylePriority.UseTextAlignment = false;
+            this.xrCVNAM_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrLSPER_1
+            // 
+            this.xrLSPER_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLSPER_1.BorderWidth = 1F;
+            this.xrLSPER_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLSPER_1.LocationFloat = new DevExpress.Utils.PointFloat(126.5833F, 254.7084F);
+            this.xrLSPER_1.Multiline = true;
+            this.xrLSPER_1.Name = "xrLSPER_1";
+            this.xrLSPER_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 30, 0, 0, 100F);
+            this.xrLSPER_1.SizeF = new System.Drawing.SizeF(145F, 25F);
+            this.xrLSPER_1.StylePriority.UseBorders = false;
+            this.xrLSPER_1.StylePriority.UseBorderWidth = false;
+            this.xrLSPER_1.StylePriority.UseFont = false;
+            this.xrLSPER_1.StylePriority.UsePadding = false;
+            this.xrLSPER_1.StylePriority.UseTextAlignment = false;
+            this.xrLSPER_1.Text = "0.00";
+            this.xrLSPER_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            // 
+            // xrAWEIT_1
+            // 
+            this.xrAWEIT_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrAWEIT_1.BorderWidth = 1F;
+            this.xrAWEIT_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrAWEIT_1.LocationFloat = new DevExpress.Utils.PointFloat(126.5833F, 279.7084F);
+            this.xrAWEIT_1.Multiline = true;
+            this.xrAWEIT_1.Name = "xrAWEIT_1";
+            this.xrAWEIT_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 30, 0, 0, 100F);
+            this.xrAWEIT_1.SizeF = new System.Drawing.SizeF(370F, 25F);
+            this.xrAWEIT_1.StylePriority.UseBorders = false;
+            this.xrAWEIT_1.StylePriority.UseBorderWidth = false;
+            this.xrAWEIT_1.StylePriority.UseFont = false;
+            this.xrAWEIT_1.StylePriority.UsePadding = false;
+            this.xrAWEIT_1.StylePriority.UseTextAlignment = false;
+            this.xrAWEIT_1.Text = "0";
+            this.xrAWEIT_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            // 
+            // xrFTIME_1
+            // 
+            this.xrFTIME_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrFTIME_1.BorderWidth = 1F;
+            this.xrFTIME_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrFTIME_1.LocationFloat = new DevExpress.Utils.PointFloat(126.5834F, 204.7084F);
+            this.xrFTIME_1.Multiline = true;
+            this.xrFTIME_1.Name = "xrFTIME_1";
+            this.xrFTIME_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrFTIME_1.SizeF = new System.Drawing.SizeF(145F, 25F);
+            this.xrFTIME_1.StylePriority.UseBorders = false;
+            this.xrFTIME_1.StylePriority.UseBorderWidth = false;
+            this.xrFTIME_1.StylePriority.UseFont = false;
+            this.xrFTIME_1.StylePriority.UsePadding = false;
+            this.xrFTIME_1.StylePriority.UseTextAlignment = false;
+            this.xrFTIME_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrSTIME_1
+            // 
+            this.xrSTIME_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrSTIME_1.BorderWidth = 1F;
+            this.xrSTIME_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrSTIME_1.LocationFloat = new DevExpress.Utils.PointFloat(126.5833F, 229.7084F);
+            this.xrSTIME_1.Multiline = true;
+            this.xrSTIME_1.Name = "xrSTIME_1";
+            this.xrSTIME_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrSTIME_1.SizeF = new System.Drawing.SizeF(145F, 25F);
+            this.xrSTIME_1.StylePriority.UseBorders = false;
+            this.xrSTIME_1.StylePriority.UseBorderWidth = false;
+            this.xrSTIME_1.StylePriority.UseFont = false;
+            this.xrSTIME_1.StylePriority.UsePadding = false;
+            this.xrSTIME_1.StylePriority.UseTextAlignment = false;
+            this.xrSTIME_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrRK_1
+            // 
+            this.xrRK_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrRK_1.BorderWidth = 1F;
+            this.xrRK_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrRK_1.LocationFloat = new DevExpress.Utils.PointFloat(126.5834F, 329.7086F);
+            this.xrRK_1.Multiline = true;
+            this.xrRK_1.Name = "xrRK_1";
+            this.xrRK_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrRK_1.SizeF = new System.Drawing.SizeF(370F, 25F);
+            this.xrRK_1.StylePriority.UseBorders = false;
+            this.xrRK_1.StylePriority.UseBorderWidth = false;
+            this.xrRK_1.StylePriority.UseFont = false;
+            this.xrRK_1.StylePriority.UsePadding = false;
+            this.xrRK_1.StylePriority.UseTextAlignment = false;
+            this.xrRK_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrITNAM_1
+            // 
+            this.xrITNAM_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrITNAM_1.BorderWidth = 1F;
+            this.xrITNAM_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrITNAM_1.LocationFloat = new DevExpress.Utils.PointFloat(351.5834F, 154.7084F);
+            this.xrITNAM_1.Multiline = true;
+            this.xrITNAM_1.Name = "xrITNAM_1";
+            this.xrITNAM_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrITNAM_1.SizeF = new System.Drawing.SizeF(145F, 25F);
+            this.xrITNAM_1.StylePriority.UseBorders = false;
+            this.xrITNAM_1.StylePriority.UseBorderWidth = false;
+            this.xrITNAM_1.StylePriority.UseFont = false;
+            this.xrITNAM_1.StylePriority.UsePadding = false;
+            this.xrITNAM_1.StylePriority.UseTextAlignment = false;
+            this.xrITNAM_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrCARNO_1
+            // 
+            this.xrCARNO_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrCARNO_1.BorderWidth = 1F;
+            this.xrCARNO_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrCARNO_1.LocationFloat = new DevExpress.Utils.PointFloat(126.5834F, 154.7084F);
+            this.xrCARNO_1.Multiline = true;
+            this.xrCARNO_1.Name = "xrCARNO_1";
+            this.xrCARNO_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrCARNO_1.SizeF = new System.Drawing.SizeF(145F, 25F);
+            this.xrCARNO_1.StylePriority.UseBorders = false;
+            this.xrCARNO_1.StylePriority.UseBorderWidth = false;
+            this.xrCARNO_1.StylePriority.UseFont = false;
+            this.xrCARNO_1.StylePriority.UsePadding = false;
+            this.xrCARNO_1.StylePriority.UseTextAlignment = false;
+            this.xrCARNO_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrTELNO_1
+            // 
+            this.xrTELNO_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrTELNO_1.LocationFloat = new DevExpress.Utils.PointFloat(70.12002F, 711.0416F);
+            this.xrTELNO_1.Multiline = true;
+            this.xrTELNO_1.Name = "xrTELNO_1";
+            this.xrTELNO_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrTELNO_1.SizeF = new System.Drawing.SizeF(403.12F, 25F);
+            this.xrTELNO_1.StylePriority.UseFont = false;
+            this.xrTELNO_1.StylePriority.UseTextAlignment = false;
+            this.xrTELNO_1.Text = "Tel : (054)337-0314    Fax : (054)337-0315";
+            this.xrTELNO_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrADDR_1
+            // 
+            this.xrADDR_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrADDR_1.LocationFloat = new DevExpress.Utils.PointFloat(70.12F, 685F);
+            this.xrADDR_1.Multiline = true;
+            this.xrADDR_1.Name = "xrADDR_1";
+            this.xrADDR_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrADDR_1.SizeF = new System.Drawing.SizeF(403.12F, 25F);
+            this.xrADDR_1.StylePriority.UseFont = false;
+            this.xrADDR_1.StylePriority.UseTextAlignment = false;
+            this.xrADDR_1.Text = "경북 영천시 영천아이시로 166-5";
+            this.xrADDR_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrCVGNM_1
+            // 
+            this.xrCVGNM_1.Font = new System.Drawing.Font("맑은 고딕", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrCVGNM_1.LocationFloat = new DevExpress.Utils.PointFloat(70.12F, 645F);
+            this.xrCVGNM_1.Multiline = true;
+            this.xrCVGNM_1.Name = "xrCVGNM_1";
+            this.xrCVGNM_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrCVGNM_1.SizeF = new System.Drawing.SizeF(403.125F, 45.83334F);
+            this.xrCVGNM_1.StylePriority.UseFont = false;
+            this.xrCVGNM_1.StylePriority.UseTextAlignment = false;
+            this.xrCVGNM_1.Text = "콜럼버스(주)영천지점";
+            this.xrCVGNM_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel19
+            // 
+            this.xrLabel19.Borders = DevExpress.XtraPrinting.BorderSide.None;
+            this.xrLabel19.BorderWidth = 1F;
+            this.xrLabel19.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrLabel19.LocationFloat = new DevExpress.Utils.PointFloat(46.58F, 620F);
+            this.xrLabel19.Multiline = true;
+            this.xrLabel19.Name = "xrLabel19";
+            this.xrLabel19.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrLabel19.SizeF = new System.Drawing.SizeF(279.0833F, 30F);
+            this.xrLabel19.StylePriority.UseBorders = false;
+            this.xrLabel19.StylePriority.UseBorderWidth = false;
+            this.xrLabel19.StylePriority.UseFont = false;
+            this.xrLabel19.StylePriority.UsePadding = false;
+            this.xrLabel19.StylePriority.UseTextAlignment = false;
+            this.xrLabel19.Text = "※ 상기와 같이 계량하였음을 증명함.";
+            this.xrLabel19.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrLabel18
+            // 
+            this.xrLabel18.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel18.BorderWidth = 1F;
+            this.xrLabel18.LocationFloat = new DevExpress.Utils.PointFloat(46.58F, 619.7086F);
+            this.xrLabel18.Multiline = true;
+            this.xrLabel18.Name = "xrLabel18";
+            this.xrLabel18.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel18.SizeF = new System.Drawing.SizeF(450F, 130F);
+            this.xrLabel18.StylePriority.UseBorders = false;
+            this.xrLabel18.StylePriority.UseBorderWidth = false;
+            // 
+            // xrLabel17
+            // 
+            this.xrLabel17.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel17.BorderWidth = 1F;
+            this.xrLabel17.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel17.LocationFloat = new DevExpress.Utils.PointFloat(46.58334F, 329.7086F);
+            this.xrLabel17.Multiline = true;
+            this.xrLabel17.Name = "xrLabel17";
+            this.xrLabel17.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel17.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel17.StylePriority.UseBorders = false;
+            this.xrLabel17.StylePriority.UseBorderWidth = false;
+            this.xrLabel17.StylePriority.UseFont = false;
+            this.xrLabel17.StylePriority.UseTextAlignment = false;
+            this.xrLabel17.Text = "비     고";
+            this.xrLabel17.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel16
+            // 
+            this.xrLabel16.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel16.BorderWidth = 1F;
+            this.xrLabel16.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel16.LocationFloat = new DevExpress.Utils.PointFloat(271.5833F, 304.7086F);
+            this.xrLabel16.Multiline = true;
+            this.xrLabel16.Name = "xrLabel16";
+            this.xrLabel16.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel16.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel16.StylePriority.UseBorders = false;
+            this.xrLabel16.StylePriority.UseBorderWidth = false;
+            this.xrLabel16.StylePriority.UseFont = false;
+            this.xrLabel16.StylePriority.UseTextAlignment = false;
+            this.xrLabel16.Text = "담 당 자";
+            this.xrLabel16.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel15
+            // 
+            this.xrLabel15.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel15.BorderWidth = 1F;
+            this.xrLabel15.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel15.LocationFloat = new DevExpress.Utils.PointFloat(46.5833F, 304.7085F);
+            this.xrLabel15.Multiline = true;
+            this.xrLabel15.Name = "xrLabel15";
+            this.xrLabel15.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel15.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel15.StylePriority.UseBorders = false;
+            this.xrLabel15.StylePriority.UseBorderWidth = false;
+            this.xrLabel15.StylePriority.UseFont = false;
+            this.xrLabel15.StylePriority.UseTextAlignment = false;
+            this.xrLabel15.Text = "운 전 자";
+            this.xrLabel15.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel13
+            // 
+            this.xrLabel13.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel13.BorderWidth = 1F;
+            this.xrLabel13.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel13.LocationFloat = new DevExpress.Utils.PointFloat(46.5833F, 279.7085F);
+            this.xrLabel13.Multiline = true;
+            this.xrLabel13.Name = "xrLabel13";
+            this.xrLabel13.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel13.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel13.StylePriority.UseBorders = false;
+            this.xrLabel13.StylePriority.UseBorderWidth = false;
+            this.xrLabel13.StylePriority.UseFont = false;
+            this.xrLabel13.StylePriority.UseTextAlignment = false;
+            this.xrLabel13.Text = "실 중 량";
+            this.xrLabel13.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel12
+            // 
+            this.xrLabel12.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel12.BorderWidth = 1F;
+            this.xrLabel12.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel12.LocationFloat = new DevExpress.Utils.PointFloat(46.5833F, 254.7084F);
+            this.xrLabel12.Multiline = true;
+            this.xrLabel12.Name = "xrLabel12";
+            this.xrLabel12.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel12.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel12.StylePriority.UseBorders = false;
+            this.xrLabel12.StylePriority.UseBorderWidth = false;
+            this.xrLabel12.StylePriority.UseFont = false;
+            this.xrLabel12.StylePriority.UseTextAlignment = false;
+            this.xrLabel12.Text = "감     량";
+            this.xrLabel12.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel11
+            // 
+            this.xrLabel11.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel11.BorderWidth = 1F;
+            this.xrLabel11.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel11.LocationFloat = new DevExpress.Utils.PointFloat(46.5833F, 229.7084F);
+            this.xrLabel11.Multiline = true;
+            this.xrLabel11.Name = "xrLabel11";
+            this.xrLabel11.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel11.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel11.StylePriority.UseBorders = false;
+            this.xrLabel11.StylePriority.UseBorderWidth = false;
+            this.xrLabel11.StylePriority.UseFont = false;
+            this.xrLabel11.StylePriority.UseTextAlignment = false;
+            this.xrLabel11.Text = "공차중량";
+            this.xrLabel11.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel10
+            // 
+            this.xrLabel10.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel10.BorderWidth = 1F;
+            this.xrLabel10.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel10.LocationFloat = new DevExpress.Utils.PointFloat(46.58334F, 204.7084F);
+            this.xrLabel10.Multiline = true;
+            this.xrLabel10.Name = "xrLabel10";
+            this.xrLabel10.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel10.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel10.StylePriority.UseBorders = false;
+            this.xrLabel10.StylePriority.UseBorderWidth = false;
+            this.xrLabel10.StylePriority.UseFont = false;
+            this.xrLabel10.StylePriority.UseTextAlignment = false;
+            this.xrLabel10.Text = "총 중 량";
+            this.xrLabel10.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel9
+            // 
+            this.xrLabel9.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel9.BorderWidth = 1F;
+            this.xrLabel9.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel9.LocationFloat = new DevExpress.Utils.PointFloat(271.5834F, 154.7084F);
+            this.xrLabel9.Multiline = true;
+            this.xrLabel9.Name = "xrLabel9";
+            this.xrLabel9.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel9.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel9.StylePriority.UseBorders = false;
+            this.xrLabel9.StylePriority.UseBorderWidth = false;
+            this.xrLabel9.StylePriority.UseFont = false;
+            this.xrLabel9.StylePriority.UseTextAlignment = false;
+            this.xrLabel9.Text = "품    명";
+            this.xrLabel9.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel8
+            // 
+            this.xrLabel8.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel8.BorderWidth = 1F;
+            this.xrLabel8.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel8.LocationFloat = new DevExpress.Utils.PointFloat(46.5834F, 179.7084F);
+            this.xrLabel8.Multiline = true;
+            this.xrLabel8.Name = "xrLabel8";
+            this.xrLabel8.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel8.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel8.StylePriority.UseBorders = false;
+            this.xrLabel8.StylePriority.UseBorderWidth = false;
+            this.xrLabel8.StylePriority.UseFont = false;
+            this.xrLabel8.StylePriority.UseTextAlignment = false;
+            this.xrLabel8.Text = "거 래 처";
+            this.xrLabel8.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel7
+            // 
+            this.xrLabel7.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel7.BorderWidth = 1F;
+            this.xrLabel7.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel7.LocationFloat = new DevExpress.Utils.PointFloat(46.58334F, 154.7084F);
+            this.xrLabel7.Multiline = true;
+            this.xrLabel7.Name = "xrLabel7";
+            this.xrLabel7.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel7.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel7.StylePriority.UseBorders = false;
+            this.xrLabel7.StylePriority.UseBorderWidth = false;
+            this.xrLabel7.StylePriority.UseFont = false;
+            this.xrLabel7.StylePriority.UseTextAlignment = false;
+            this.xrLabel7.Text = "차량번호";
+            this.xrLabel7.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel6
+            // 
+            this.xrLabel6.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel6.BorderWidth = 1F;
+            this.xrLabel6.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel6.LocationFloat = new DevExpress.Utils.PointFloat(46.58334F, 129.7084F);
+            this.xrLabel6.Multiline = true;
+            this.xrLabel6.Name = "xrLabel6";
+            this.xrLabel6.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel6.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel6.StylePriority.UseBorders = false;
+            this.xrLabel6.StylePriority.UseBorderWidth = false;
+            this.xrLabel6.StylePriority.UseFont = false;
+            this.xrLabel6.StylePriority.UseTextAlignment = false;
+            this.xrLabel6.Text = "계량일자";
+            this.xrLabel6.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrSLINO_1
+            // 
+            this.xrSLINO_1.Borders = DevExpress.XtraPrinting.BorderSide.None;
+            this.xrSLINO_1.BorderWidth = 1F;
+            this.xrSLINO_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrSLINO_1.LocationFloat = new DevExpress.Utils.PointFloat(327.9167F, 99.70837F);
+            this.xrSLINO_1.Multiline = true;
+            this.xrSLINO_1.Name = "xrSLINO_1";
+            this.xrSLINO_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 5, 0, 0, 100F);
+            this.xrSLINO_1.SizeF = new System.Drawing.SizeF(168.6667F, 30.00001F);
+            this.xrSLINO_1.StylePriority.UseBorders = false;
+            this.xrSLINO_1.StylePriority.UseBorderWidth = false;
+            this.xrSLINO_1.StylePriority.UseFont = false;
+            this.xrSLINO_1.StylePriority.UsePadding = false;
+            this.xrSLINO_1.StylePriority.UseTextAlignment = false;
+            this.xrSLINO_1.Text = "전표번호 : ";
+            this.xrSLINO_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            // 
+            // xrLabel4
+            // 
+            this.xrLabel4.Borders = DevExpress.XtraPrinting.BorderSide.Top;
+            this.xrLabel4.Font = new System.Drawing.Font("맑은 고딕", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrLabel4.LocationFloat = new DevExpress.Utils.PointFloat(155F, 85F);
+            this.xrLabel4.Multiline = true;
+            this.xrLabel4.Name = "xrLabel4";
+            this.xrLabel4.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel4.SizeF = new System.Drawing.SizeF(230F, 30F);
+            this.xrLabel4.StylePriority.UseBorders = false;
+            this.xrLabel4.StylePriority.UseFont = false;
+            this.xrLabel4.StylePriority.UseTextAlignment = false;
+            this.xrLabel4.Text = "( 보 관 용 )";
+            this.xrLabel4.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel3
+            // 
+            this.xrLabel3.Font = new System.Drawing.Font("맑은 고딕", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrLabel3.LocationFloat = new DevExpress.Utils.PointFloat(70.12498F, 44.91669F);
+            this.xrLabel3.Multiline = true;
+            this.xrLabel3.Name = "xrLabel3";
+            this.xrLabel3.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel3.SizeF = new System.Drawing.SizeF(403.125F, 45.83334F);
+            this.xrLabel3.StylePriority.UseFont = false;
+            this.xrLabel3.StylePriority.UseTextAlignment = false;
+            this.xrLabel3.Text = "계  량  증  명  서";
+            this.xrLabel3.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabel1
+            // 
+            this.xrLabel1.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
+            | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel1.BorderWidth = 1F;
+            this.xrLabel1.LocationFloat = new DevExpress.Utils.PointFloat(46.5833F, 29.70835F);
+            this.xrLabel1.Multiline = true;
+            this.xrLabel1.Name = "xrLabel1";
+            this.xrLabel1.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel1.SizeF = new System.Drawing.SizeF(450F, 100F);
+            this.xrLabel1.StylePriority.UseBorders = false;
+            this.xrLabel1.StylePriority.UseBorderWidth = false;
+            // 
+            // xrLabel33
+            // 
+            this.xrLabel33.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
+            | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel33.BorderWidth = 1F;
+            this.xrLabel33.LocationFloat = new DevExpress.Utils.PointFloat(651.3748F, 29.70842F);
+            this.xrLabel33.Multiline = true;
+            this.xrLabel33.Name = "xrLabel33";
+            this.xrLabel33.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel33.SizeF = new System.Drawing.SizeF(450F, 100F);
+            this.xrLabel33.StylePriority.UseBorders = false;
+            this.xrLabel33.StylePriority.UseBorderWidth = false;
+            // 
+            // xrLabel49
+            // 
+            this.xrLabel49.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel49.BorderWidth = 1F;
+            this.xrLabel49.LocationFloat = new DevExpress.Utils.PointFloat(651.3715F, 619.7086F);
+            this.xrLabel49.Multiline = true;
+            this.xrLabel49.Name = "xrLabel49";
+            this.xrLabel49.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel49.SizeF = new System.Drawing.SizeF(450F, 130F);
+            this.xrLabel49.StylePriority.UseBorders = false;
+            this.xrLabel49.StylePriority.UseBorderWidth = false;
+            // 
+            // xrLabel2
+            // 
+            this.xrLabel2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel2.BorderWidth = 1F;
+            this.xrLabel2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel2.LocationFloat = new DevExpress.Utils.PointFloat(271.58F, 129.7084F);
+            this.xrLabel2.Multiline = true;
+            this.xrLabel2.Name = "xrLabel2";
+            this.xrLabel2.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel2.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel2.StylePriority.UseBorders = false;
+            this.xrLabel2.StylePriority.UseBorderWidth = false;
+            this.xrLabel2.StylePriority.UseFont = false;
+            this.xrLabel2.StylePriority.UseTextAlignment = false;
+            this.xrLabel2.Text = "구    분";
+            this.xrLabel2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabelGubun_1
+            // 
+            this.xrLabelGubun_1.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabelGubun_1.BorderWidth = 1F;
+            this.xrLabelGubun_1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrLabelGubun_1.LocationFloat = new DevExpress.Utils.PointFloat(351.597F, 129.7084F);
+            this.xrLabelGubun_1.Multiline = true;
+            this.xrLabelGubun_1.Name = "xrLabelGubun_1";
+            this.xrLabelGubun_1.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrLabelGubun_1.SizeF = new System.Drawing.SizeF(144.9966F, 25.00002F);
+            this.xrLabelGubun_1.StylePriority.UseBorders = false;
+            this.xrLabelGubun_1.StylePriority.UseBorderWidth = false;
+            this.xrLabelGubun_1.StylePriority.UseFont = false;
+            this.xrLabelGubun_1.StylePriority.UsePadding = false;
+            this.xrLabelGubun_1.StylePriority.UseTextAlignment = false;
+            this.xrLabelGubun_1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // xrLabel5
+            // 
+            this.xrLabel5.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel5.BorderWidth = 1F;
+            this.xrLabel5.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel5.LocationFloat = new DevExpress.Utils.PointFloat(876.3714F, 129.7084F);
+            this.xrLabel5.Multiline = true;
+            this.xrLabel5.Name = "xrLabel5";
+            this.xrLabel5.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+            this.xrLabel5.SizeF = new System.Drawing.SizeF(80F, 25F);
+            this.xrLabel5.StylePriority.UseBorders = false;
+            this.xrLabel5.StylePriority.UseBorderWidth = false;
+            this.xrLabel5.StylePriority.UseFont = false;
+            this.xrLabel5.StylePriority.UseTextAlignment = false;
+            this.xrLabel5.Text = "구    분";
+            this.xrLabel5.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            // 
+            // xrLabelGubun_2
+            // 
+            this.xrLabelGubun_2.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Right | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabelGubun_2.BorderWidth = 1F;
+            this.xrLabelGubun_2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xrLabelGubun_2.LocationFloat = new DevExpress.Utils.PointFloat(956.3886F, 129.7084F);
+            this.xrLabelGubun_2.Multiline = true;
+            this.xrLabelGubun_2.Name = "xrLabelGubun_2";
+            this.xrLabelGubun_2.Padding = new DevExpress.XtraPrinting.PaddingInfo(10, 2, 0, 0, 100F);
+            this.xrLabelGubun_2.SizeF = new System.Drawing.SizeF(144.9965F, 25.00002F);
+            this.xrLabelGubun_2.StylePriority.UseBorders = false;
+            this.xrLabelGubun_2.StylePriority.UseBorderWidth = false;
+            this.xrLabelGubun_2.StylePriority.UseFont = false;
+            this.xrLabelGubun_2.StylePriority.UsePadding = false;
+            this.xrLabelGubun_2.StylePriority.UseTextAlignment = false;
+            this.xrLabelGubun_2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // Measure_Doc
+            // 
+            this.Bands.AddRange(new DevExpress.XtraReports.UI.Band[] {
+            this.TopMargin,
+            this.BottomMargin,
+            this.Detail,
+            this.PageHeader});
+            this.BorderWidth = 3F;
+            this.Font = new System.Drawing.Font("Arial", 9.75F);
+            this.Landscape = true;
+            this.Margins = new System.Drawing.Printing.Margins(18, 17, 14, 25);
+            this.PageHeight = 827;
+            this.PageWidth = 1169;
+            this.PaperKind = System.Drawing.Printing.PaperKind.A4;
+            this.Version = "18.2";
+            this.BeforePrint += new System.Drawing.Printing.PrintEventHandler(this.Measure_Doc_BeforePrint);
+            ((System.ComponentModel.ISupportInitialize)(this)).EndInit();
+
+        }
+
+        #endregion
+
+        private DevExpress.XtraReports.UI.TopMarginBand TopMargin;
+        private DevExpress.XtraReports.UI.BottomMarginBand BottomMargin;
+        private DevExpress.XtraReports.UI.DetailBand Detail;
+        private DevExpress.XtraReports.UI.PageHeaderBand PageHeader;
+        private DevExpress.XtraReports.UI.XRLabel xrTELNO_1;
+        private DevExpress.XtraReports.UI.XRLabel xrADDR_1;
+        private DevExpress.XtraReports.UI.XRLabel xrCVGNM_1;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel19;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel18;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel17;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel16;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel15;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel13;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel12;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel11;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel10;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel9;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel8;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel7;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel6;
+        private DevExpress.XtraReports.UI.XRLabel xrSLINO_1;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel4;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel3;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel1;
+        private DevExpress.XtraReports.UI.XRLabel xrLWEIT_1;
+        private DevExpress.XtraReports.UI.XRLabel xrEWEIT_1;
+        private DevExpress.XtraReports.UI.XRLabel xrRWEIT_1;
+        private DevExpress.XtraReports.UI.XRLabel xrPLNAM_1;
+        private DevExpress.XtraReports.UI.XRLabel xrCARPL_1;
+        private DevExpress.XtraReports.UI.XRLabel xrTDATE_1;
+        private DevExpress.XtraReports.UI.XRLabel xrCVNAM_1;
+        private DevExpress.XtraReports.UI.XRLabel xrLSPER_1;
+        private DevExpress.XtraReports.UI.XRLabel xrAWEIT_1;
+        private DevExpress.XtraReports.UI.XRLabel xrFTIME_1;
+        private DevExpress.XtraReports.UI.XRLabel xrSTIME_1;
+        private DevExpress.XtraReports.UI.XRLabel xrRK_1;
+        private DevExpress.XtraReports.UI.XRLabel xrITNAM_1;
+        private DevExpress.XtraReports.UI.XRLabel xrCARNO_1;
+        private DevExpress.XtraReports.UI.XRPictureBox xrPic_1_2_1;
+        private DevExpress.XtraReports.UI.XRPictureBox xrPic_2_2_1;
+        private DevExpress.XtraReports.UI.XRPictureBox xrPic_2_1_1;
+        private DevExpress.XtraReports.UI.XRPictureBox xrPic_1_1_1;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel29;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel26;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel25;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel24;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel23;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel30;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel31;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel32;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel34;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel35;
+        private DevExpress.XtraReports.UI.XRLabel xrSLINO_2;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel37;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel38;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel39;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel40;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel41;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel42;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel43;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel44;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel46;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel47;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel48;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel49;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel50;
+        private DevExpress.XtraReports.UI.XRLabel xrCVGNM_2;
+        private DevExpress.XtraReports.UI.XRLabel xrADDR_2;
+        private DevExpress.XtraReports.UI.XRLabel xrTELNO_2;
+        private DevExpress.XtraReports.UI.XRLabel xrCARNO_2;
+        private DevExpress.XtraReports.UI.XRLabel xrITNAM_2;
+        private DevExpress.XtraReports.UI.XRLabel xrRK_2;
+        private DevExpress.XtraReports.UI.XRLabel xrSTIME_2;
+        private DevExpress.XtraReports.UI.XRLabel xrFTIME_2;
+        private DevExpress.XtraReports.UI.XRLabel xrAWEIT_2;
+        private DevExpress.XtraReports.UI.XRLabel xrLSPER_2;
+        private DevExpress.XtraReports.UI.XRLabel xrCVNAM_2;
+        private DevExpress.XtraReports.UI.XRLabel xrTDATE_2;
+        private DevExpress.XtraReports.UI.XRLabel xrCARPL_2;
+        private DevExpress.XtraReports.UI.XRLabel xrPLNAM_2;
+        private DevExpress.XtraReports.UI.XRLabel xrRWEIT_2;
+        private DevExpress.XtraReports.UI.XRLabel xrEWEIT_2;
+        private DevExpress.XtraReports.UI.XRLabel xrLWEIT_2;
+        private DevExpress.XtraReports.UI.XRPictureBox xrPic_1_1_2;
+        private DevExpress.XtraReports.UI.XRPictureBox xrPic_2_1_2;
+        private DevExpress.XtraReports.UI.XRPictureBox xrPic_2_2_2;
+        private DevExpress.XtraReports.UI.XRPictureBox xrPic_1_2_2;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel70;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel71;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel72;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel73;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel76;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel77;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel78;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel33;
+        private DevExpress.XtraReports.UI.XRLabel xrLabelGubun_2;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel5;
+        private DevExpress.XtraReports.UI.XRLabel xrLabelGubun_1;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel2;
+    }
+}

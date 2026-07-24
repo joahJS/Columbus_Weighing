@@ -1,0 +1,5480 @@
+﻿using DevExpress.XtraEditors;
+using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraReports.UI;
+using DevExpress.XtraSplashScreen;
+using OpenCvSharp;
+using OpenCvSharp.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.IO.Ports;
+using System.Linq;
+using System.Media;
+using System.Net;
+using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Size = System.Drawing.Size;
+
+/*
+ * RTSP로 변경(2024-03-13)
+ * 테스트 시 변경 해야할 코드 _ 검색:테스트용 
+ * setting.ini 파일 개발에 맞게 수정 _ 위치 : debug파일
+ */
+
+namespace WeighingSystem
+{
+    public partial class MainForm : Form
+    {
+        #region Properties
+        /// <summary>
+        /// 계량 진행 상태
+        /// </summary>
+        public enum WeighingState { None, Standby, Start, Stable, Complete };
+        public enum WeighingType { None, In, Out };
+        public enum WeighingStep { None, First, Second }
+
+        private string PROCEDURE_ID = "usp_WeightingSystem";
+        /*
+        * 2020-12-10 계근미확정 3초 지속 시 상태값 변화를 위하여 변수 추가
+        */
+        public enum ConfirmYN { Confirm, NonConfirm };
+
+        [DllImport("user32.dll")]
+        static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
+
+        [DllImport("VKB.dll", CharSet = CharSet.Auto)]
+        static extern void InitHook(IntPtr hHandle);
+
+        [DllImport("VKB.dll", CharSet = CharSet.Auto)]
+        static extern void InstallHook();
+
+        [DllImport("kernel32")]
+        public static extern int SetFileAttributes(string lpFileName, int dwFileAttributes);
+
+        //[DllImport("user32.dll")]
+        //static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        //[DllImport("user32.dll")]
+        //static extern int SendMessage(IntPtr hWnd, uint message, int wParam, int lParam);
+
+        delegate void SelectTabPageCallback(int no);
+        delegate void SetCompleteButtonCallback(bool enabled);
+        delegate void SetCompleteButtonCallback3(bool enabled);
+        delegate void SetCompleteButtonCallback2(bool enabled, string sText);
+
+        //2020-12-08 계근확정 시 아무런 액션이 없을 경우 해당 변수 사용하기 위하여 추가 / Ini파일 참조
+        private int _autoCompleteSecond = 5;
+
+        private ConfirmYN _confirm = ConfirmYN.NonConfirm;
+
+        private readonly object _lockObject = new object();
+        private readonly object _lockCamera1 = new object();
+        private readonly object _lockCamera2 = new object();
+        private readonly object _lockCamera3 = new object();
+
+        private SerialPort _indicator = null;                               // INDICATOR
+        private bool _indicatorPrevConnected = false;
+        private bool _indicatorConnected = false;
+        private DateTime _indicatorReceiveTime;
+
+        Thread indicator_thread;
+        TcpClient tcpClient;
+        IPEndPoint ipEnd;
+
+        private string _connectionString = string.Empty;                    // DB
+
+        private SingleFtpClient _ftpClient = SingleFtpClient.Instance;      // FTP
+        private string _currentFtpLocation = string.Empty;
+
+        private bool _bVKLShiftButtonState = false;                         // true : SHIFT ON, false : SHIFT OFF
+        private bool _bVKRShiftButtonState = false;                         // true : SHIFT ON, false : SHIFT OFF
+        private bool _bVKKorEngButtonState = false;                         // 한영 전환용
+        private bool _bVKCapsLock = false;                                  // Caps Lock
+
+        private bool _firstLoad = false;
+        private bool _shutdown = false;
+
+        private System.Threading.Timer _indicatorTimer = null;
+        private System.Threading.Timer _ftpTimer = null;
+
+        private WeighingType _weighingType = WeighingType.None;             // 계량타입 : 입고, 출고
+        private WeighingStep _weighingStep = WeighingStep.None;             // 계근선택 : 1차, 2차
+        private string _CARNO = string.Empty;                       // 차량번호   
+        private bool _useWeighing = false;                                  // 계량진행여부 플레그     
+        private bool _weightFlag = false;                                   // 계량시작 플레그
+        private WeighingState _state = WeighingState.None;                  // 계량 진행 상태
+        private int _stableCount = 0;                                       // 안정화된 인디케이터 누적 카운트
+        private int _weight = 0;                                            // 계량중량
+
+        // DB 검색 정보들..
+        // - CVMAST
+        private string _CVCOD = string.Empty;                    // 거래처코드
+        private string _CVNAM = string.Empty;                    // 거래처명
+        private string _FAXNO = string.Empty;                    // 팩스번호
+        private string _FAXYN = string.Empty;                    // 웹팩스 사용여부
+        // - MEASURE
+        private string _SLINO = string.Empty;                    // 전표아이디
+        private string _TDATE = string.Empty;                    // 일자
+        private string _SEQNO = string.Empty;                    // 계근번호(순번)
+        private string _JOBGU = string.Empty;                    // 입출고구분 (I:입고 / O:출고)
+        private string _CVGUB = string.Empty;                    // 사업장구분 (1:영천지점 / 2: ??지점 / 3: ??지점)
+        // _CVCOD
+        // _CVNAM
+        private string _ITCOD = string.Empty;                    // 품목코드
+        private string _ITNAM = string.Empty;                    // 품명
+        private double _UCOST = 0.00;                            // 단가
+        private string _FTIME = string.Empty;                    // 1차계근 시간
+        private int _FWEIT = 0;                                  //         중량 
+        private string _STIME = string.Empty;                    // 2차계근 시간
+        private int _SWEIT = 0;                                  //         중량
+        private string _CHKYN = string.Empty;                    // 검수여부 ("0" 이 아니면 검수)
+        private int _LWEIT = 0;                                  // 감량
+        private string _LOSGU = string.Empty;                    // 감가/감량사유
+        private string _LOSNM = string.Empty;                    // 감가/감량사유
+        private string _INSRK = string.Empty;                    // 검수비고
+        private string _PLNCD = string.Empty;                    // 검수자코드
+        private string _PLNNM = string.Empty;                    // 검수자명
+        private int _EWEIT = 0;                                  // 공차중량
+        private int _RWEIT = 0;                                  // 실중량
+        private int _AWEIT = 0;                                  // 인수량
+        private string _RK = string.Empty;                       // 비고
+
+        // - ticket image
+        private string _selectedTicketImage_1_1 = string.Empty;
+        private string _selectedTicketImage_1_2 = string.Empty;
+        private string _selectedTicketImage_1_3 = string.Empty;
+        private string _selectedTicketImage_2_1 = string.Empty;
+        private string _selectedTicketImage_2_2 = string.Empty;
+        private string _selectedTicketImage_2_3 = string.Empty;
+
+        #region setting.ini 
+
+        private IniFile _ini = null;
+
+        private int _startWeight = 0;                               // 계량시작 중량
+        private int _secondWeighingDay = 0;                         // 1차->2차계량 가능 일 수
+        private int _stableWeightCount = 0;                         // 안정화된 중량 카운트
+        private bool _writeIndicatorData = false;                   // 인디케이터 수신데이터 로그기록여부
+        private bool _faxServiceIsTest = false;                     // 팩스서비스 연동환경 설정값, true - 개발용(테스트베드), false - 상업용(실서비스)
+        private string _faxNumber = string.Empty;                   // 팩스발송번호
+        private bool _saveImage = false;                            // 사진저장여부
+        private bool _ticketPrint = false;                          // 전표출력여부
+        private float _X = 0.0f;                                    // 전표출력 기준좌표 : X
+        private float _Y = 0.0f;                                    //                   : Y
+        private string _nvrAppPath = string.Empty;                  // NVR 영상저장 프로그램 경로
+        private int _logDay = 0;                                    // 로그기록 일수
+
+        private string _indicatorPortName = string.Empty;           // 인디케이터   - 포트명
+        private string _indicatorBaudRate = string.Empty;           //              - BaudRate
+        private string _indicatorDataBit = string.Empty;            //              - DataBit
+        private string _indicatorStopBit = string.Empty;            //              - StopBit
+        private string _indicatorParityBit = string.Empty;          //              - Parity
+
+        private string _indicator_IOT_IP = string.Empty;            // 인디케이터   - IOT IP
+        private string _indicator_IOT_Port = string.Empty;          //              - IOT Port
+
+        private string _dbAddress = string.Empty;                   // 데이터베이스 - Address
+        private string _dbName = string.Empty;                      //              - Database
+        private string _dbUser = string.Empty;                      //              - User
+        private string _dbPassword = string.Empty;                  //              - Password
+
+        private string _ftpAddress = string.Empty;                  // FTP SERVER   - Address
+        private string _ftpUser = string.Empty;                     //              - User
+        private string _ftpPassword = string.Empty;                 //              - Password
+        private string _ftpUploadPath = string.Empty;               //              - 업로드폴더 
+
+        private string _cam1 = string.Empty;
+        private string _cam2 = string.Empty;
+        private string _cam3 = string.Empty;
+
+        #region [ CCTV 영상 변수 ]
+        Mat frame1;
+        Mat frame2;
+        Mat frame3;
+        string RSTPaddr1 = string.Empty;
+        string RSTPaddr2 = string.Empty;
+        string RSTPaddr3 = string.Empty;
+        #endregion
+        #region [ 쓰레드 ]
+        Thread t_Camera1;
+        Thread t_Camera2;
+        Thread t_Camera3;
+        #endregion
+        #region [ 녹화 및 저장 변수 ]
+        VideoCapture capture1;
+        VideoCapture capture2;
+        VideoCapture capture3;
+        #endregion
+        #region [ 조건 변수 ]
+        bool isConnected;
+        #endregion
+        #endregion
+        #endregion
+
+        public MainForm()
+        {
+            InitializeComponent();
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            if (!_firstLoad)
+            {
+                pictureBoxA.BackgroundImage = Properties.Resources.A;
+                Log.AddLog("프로그램이 실행되었습니다.");
+                _firstLoad = true;
+                // 탭 컨트롤 탭 숨기기 설정
+                InitUserControl();
+                // setting.ini 파일 데이터 Read
+                ReadSettingData();
+                // setting 데이터 기반하여 인디케이터, DB, FTP 등 초기설정
+                Initialize();
+                //// 인디케이터, FTP 쓰레드 시작 (인디케이터가 없는 환경에서 테스트 시, 비활성화 후, 아래의 IndicatorTestEnabled() 메서드 주석 해제)
+                Start();
+                // 좌측상단 인디케이터 항시 조회
+                IndicatorStart();
+                //_ftpTimer.Change(1000, System.Threading.Timeout.Infinite); //테스트용
+                // RTSP CCTV 정보 Read (setting.ini)
+                RTSP_Init();
+                // RTSP CCTV, 자동계근확인 쓰레드 시작
+                StartAll();
+                // 로드 시, 이미지 임시폴더 (\image) 잔류 이미지 삭제
+                InitFTPFile();
+                // 룩업 에디트 데이터 할당 (품목)
+                InitLookUp();
+            }
+        }
+
+        #region[단계별 코드]
+
+        #region 입출고 선택 (Page 0)
+        private void Page0_Button_Click(object sender, EventArgs e)
+        {
+            Button bt = (Button)sender;
+
+            string JOBGU = string.Empty;
+
+            // 가장 최근 완료된 계근표 출력
+            if (bt.Name.Contains("Print"))
+            {
+                string label1 = "계근표를 재출력하시겠습니까?";
+                string label2 = string.Empty;
+                string SLINO = string.Empty;
+                string TDATE = string.Empty;
+                _DicParams.Add("CMD", "LAST_MEASURE_RETR");
+                DataTable dt = GetDataTable(PROCEDURE_ID, _DicParams);
+                if (dt != null)
+                {
+                    if (dt.Rows.Count > 0)
+                    {
+                        SLINO = dt.Rows[0]["SLINO"]?.ToString();
+                        TDATE = dt.Rows[0]["TDATE"]?.ToString();
+                        label2 = string.Concat(dt.Rows[0]["CARNO"]?.ToString(), " / ", dt.Rows[0]["CVNAM"]?.ToString(), " / ", dt.Rows[0]["ITNAM"]?.ToString());
+
+                        if (dt.Columns.Contains("JOBGU"))
+                        {
+                            JOBGU = dt.Rows[0]["JOBGU"]?.ToString();
+                        }
+                    }
+                }
+                
+                if (string.IsNullOrEmpty(SLINO))
+                {
+                    using (MessageForm form = new MessageForm())
+                    {
+                        form.FormTitle = "계근정보없음";
+                        form.Message_1 = "최근 완료된";
+                        form.Message_2 = "계근정보가 없습니다.";
+                        form.ShowDialog();
+                    }
+                    return;
+                }
+
+                using (PrintForm form = new PrintForm(label1, label2))
+                {
+                    DialogResult result = form.ShowDialog();
+                    if (result == DialogResult.Yes)
+                    {
+                        Log.AddLog("계량전표 재출력");
+                        //printDocument.Print();
+
+                        // 백그라운드에서 비동기 수행
+                        Task.Run(() =>
+                        {
+                            try
+                            {
+                                string[] strArr = TDATE.Split('-');
+                                string ftpPath = @"ftp://" + _ftpAddress + "/" + _ftpUploadPath + "/Images/" + strArr[0] + "/" + strArr[1] + "/" + TDATE;
+                                FtpWebRequest req = (FtpWebRequest)WebRequest.Create(ftpPath);
+                                req.Credentials = new NetworkCredential(_ftpUser, _ftpPassword);
+                                req.Method = WebRequestMethods.Ftp.ListDirectory;
+
+                                Dictionary<string, Image> dicPicture = new Dictionary<string, Image>();
+                                dicPicture.Add("1_1", null);
+                                dicPicture.Add("1_2", null);
+                                dicPicture.Add("2_1", null);
+                                dicPicture.Add("2_2", null);
+                                Dictionary<string, Image> dicCopy = new Dictionary<string, Image>();
+                                foreach (KeyValuePair<string, Image> item in dicPicture)
+                                    dicCopy.Add(item.Key, null);
+
+                                try
+                                {
+                                    string[] filesInDirectory = null;
+                                    using (FtpWebResponse reqRes = (FtpWebResponse)req.GetResponse())
+                                    {
+                                        StreamReader reader = new StreamReader(reqRes.GetResponseStream());
+                                        string strData = reader.ReadToEnd();
+                                        //폴더 내 파일이름
+                                        filesInDirectory = strData.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                                        reader.Close();
+
+                                        foreach (KeyValuePair<string, Image> item in dicPicture)
+                                        {
+                                            //해당 파일 Index
+                                            int findIndex = Array.FindIndex(filesInDirectory, i => i == string.Format("{0}_{1}.jpg", SLINO, item.Key));
+                                            if (findIndex >= 0)
+                                            {
+                                                string fileName = filesInDirectory[findIndex];
+                                                dicCopy[item.Key] = DownloadFTPFile(string.Format(@"{0}\{1}", ftpPath, fileName), _ftpUser, _ftpPassword);
+                                            }
+                                        }
+                                    }
+
+                                    if (dicCopy["1_1"] == null) { dicCopy["1_1"] = Properties.Resources.No_Img; }
+                                    if (dicCopy["1_2"] == null) { dicCopy["1_2"] = Properties.Resources.No_Img; }
+                                    if (dicCopy["2_1"] == null) { dicCopy["2_1"] = Properties.Resources.No_Img; }
+                                    if (dicCopy["2_2"] == null) { dicCopy["2_2"] = Properties.Resources.No_Img; }
+                                    //dicPicture = null;
+                                }
+                                catch (Exception ex)
+                                {
+                                    return;
+                                }
+
+                                _DicParams.Add("CMD", "MEASURE_PRINT_RETR");
+                                _DicParams.Add("SLINO", SLINO);
+                                DataTable dtPrint = GetDataTable("DP_SA015F00", _DicParams);
+
+                                // JOBGU가 비어 있으면 SLINO 기준으로 다시 조회
+                                if (string.IsNullOrEmpty(JOBGU))
+                                {
+                                    _DicParams.Add("CMD", "MEASURE_BOUND");
+                                    _DicParams.Add("SLINO", SLINO);
+                                    DataTable dtBound = GetDataTable("DP_SA015F00", _DicParams);
+
+                                    if (dtBound != null && dtBound.Rows.Count > 0 && dtBound.Columns.Contains("JOBGU"))
+                                    {
+                                        JOBGU = dtBound.Rows[0]["JOBGU"]?.ToString();
+                                    }
+                                }
+
+                                if (dtPrint != null && dtPrint.Rows.Count > 0)
+                                {
+                                    if (!dtPrint.Columns.Contains("JOBGU"))
+                                    {
+                                        dtPrint.Columns.Add("JOBGU", typeof(string));
+                                    }
+
+                                    dtPrint.Rows[0]["JOBGU"] = JOBGU;
+                                }
+
+                                if (dtPrint != null)
+                                {
+                                    /* 25.05.19 수정, 무인계근에서는 A5 사이즈로 출력되도록
+                                    // A4 사이즈로 생성된 ReportViewer 창 열기
+                                    //ReportViewer frm = new ReportViewer("Measure_Doc", dt, dicCopy);
+                                    //frm.ShowDialog();
+
+                                    // A4 사이즈로 자동 출력
+                                    Measure_Doc measure_doc = new Measure_Doc(dtPrint, dicCopy);
+                                    ReportPrintTool printTool = new ReportPrintTool(measure_doc);
+                                    measure_doc.DataSource = dt;
+                                    this.Name = "계량증명서";
+                                    measure_doc.CreateDocument();
+                                    // 대화상자 없이 바로 출력
+                                    printTool.PrintingSystem.ShowPrintStatusDialog = false; // 상태 표시 안 함
+                                    printTool.PrintingSystem.ShowMarginsWarning = false;    // 용지 불일치 경고 표시 안 함
+                                                                                            // 설정된 기본 프린터로 자동 출력
+                                    printTool.Print();
+                                    // 프린터 선택 창을 띄워 사용자가 선택 후 출력
+                                    //printTool.PrintDialog();
+                                    */
+
+                                    // 25.05.09 추가, A5 사이즈로 2장 자동출력
+                                    XtraReport xr = new XtraReport();
+                                    xr.PaperKind = System.Drawing.Printing.PaperKind.A5;
+                                    // 보관용
+                                    Measure_Doc_A5 measure_doc_in = new Measure_Doc_A5(dtPrint, dicCopy, "IN");
+                                    measure_doc_in.DataSource = dtPrint;
+                                    this.Name = "계량증명서";
+                                    measure_doc_in.CreateDocument();
+                                    foreach (DevExpress.XtraPrinting.Page page in measure_doc_in.Pages) { xr.Pages.Add(page); }
+                                    // 제출용
+                                    Measure_Doc_A5 measure_doc_out = new Measure_Doc_A5(dtPrint, dicCopy, "OUT");
+                                    measure_doc_out.DataSource = dtPrint;
+                                    this.Name = "계량증명서";
+                                    measure_doc_out.CreateDocument();
+                                    foreach (DevExpress.XtraPrinting.Page page in measure_doc_out.Pages) { xr.Pages.Add(page); }
+
+                                    ReportPrintTool printTool = new ReportPrintTool(xr);
+                                    // 대화상자 없이 바로 출력
+                                    printTool.PrintingSystem.ShowPrintStatusDialog = false; // 상태 표시 안 함
+                                    printTool.PrintingSystem.ShowMarginsWarning = false;    // 용지 불일치 경고 표시 안 함
+                                    // 설정된 기본 프린터로 자동 출력
+                                    printTool.Print();
+                                    
+                                    using (MessageForm form1 = new MessageForm())
+                                    {
+                                        form1.FormTitle = "계근재출력";
+                                        form1.Message_1 = "재출력 요청 완료되었습니다.";
+                                        form1.Message_2 = "잠시만 기다려주세요.";
+                                        form1.ShowDialog();
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                        });
+                    }
+                }
+            }
+            else
+            {
+                // 입고
+                if (bt.Name.Contains("In"))
+                {
+                    Log.AddLog("입고 선택");
+                    _weighingType = WeighingType.In;
+                    _JOBGU = "I";
+                }
+                // 출고
+                else if (bt.Name.Contains("Out"))
+                {
+                    this.Focus();
+
+                    Log.AddLog("출고 선택");
+                    _weighingType = WeighingType.Out;
+                    _JOBGU = "O";
+                }
+                _weighingStep = WeighingStep.None;
+                SelectTabPage(1);   // 계근선택
+            }
+        }
+
+        private Image DownloadFTPFile(string sourceFileURI, string user, string pw)
+        {
+            Image img = null;
+            try
+            {
+                Uri sourceFileUri = new Uri(sourceFileURI);
+                FtpWebRequest ftpWebRequest = WebRequest.Create(sourceFileUri) as FtpWebRequest;
+
+                ftpWebRequest.Credentials = new NetworkCredential(user, pw);
+                ftpWebRequest.Method = WebRequestMethods.Ftp.DownloadFile;
+
+                FtpWebResponse ftpWebResponse = ftpWebRequest.GetResponse() as FtpWebResponse;
+
+                Stream sourceStream = ftpWebResponse.GetResponseStream();
+                img = Image.FromStream(sourceStream);
+                sourceStream.Close();
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+
+            return img;
+        }
+        #endregion
+
+        #region 계근 선택 (Page 1)
+        private void Page1_Button_Click(object sender, EventArgs e)
+        {
+            Button bt = (Button)sender;
+            // 1차계근
+            if (bt.Name.Contains("1st"))
+            {
+                Log.AddLog("1차계근 선택");
+                _weighingStep = WeighingStep.First;
+                InitVehicleNumber();
+                SelectTabPage(2);   // 차량번호입력
+            }
+            // 2차계근
+            else if (bt.Name.Contains("2nd"))
+            {
+                Log.AddLog("2차계근 선택");
+                _weighingStep = WeighingStep.Second;
+                //InitVehicleNumber();
+                //SelectTabPage(2);   // 차량번호입력
+                MeasureSearch();
+                SelectTabPage(8);    // 1차계근 선택 / 품목 및 감량 검수
+            }
+            // 이전
+            else if (bt.Name.Contains("Prev"))
+            {
+                this.Focus();
+
+                Log.AddLog("이전단계이동");
+                _weighingStep = WeighingStep.None;
+                SelectTabPage(0);   // 입출고 선택
+            }
+        }
+        #endregion
+
+        #region 차량번호 입력 (Page 2)
+        private void Page2_Button_Click(object sender, EventArgs e)
+        {
+            Button bt = (Button)sender;
+            // 0 ~ 9 / ←
+            if (bt.Name.Contains("Number") || bt.Name.Contains("Backspace")) { InputVehicleNumber((Button)sender); }
+            // 초기화
+            else if (bt.Name.Contains("Init")) { InitVehicleNumber(); }
+            // 이전
+            else if (bt.Name.Contains("Prev"))
+            {
+                Log.AddLog("이전단계이동");
+                _weighingStep = WeighingStep.None;
+                InitVehicleNumber();
+                SelectTabPage(1);   // 계근선택
+            }
+            // 다음
+            else if (bt.Name.Contains("Next"))
+            {
+                CheckValues();
+
+                // 2차 계근 시, 해당 페이지에서 전환됨
+                if (_weighingStep == WeighingStep.Second)
+                {
+                    // 인디케이터가 없는 환경에서 저장 테스트 시 활성화
+                    // Load의 Start() 메서드 주석처리 필요
+                    // 위 InitValues() 메서드의 버튼 비활성화 코드
+                    //IndicatorTestEnabled();
+                }
+            }
+        }
+
+        // 다음 페이지를 위한 값 체크 메서드
+        private void CheckValues()
+        {
+            // 0. 차량번호 입력값 검사
+            _CARNO = textBoxVehicleNumber.Text?.ToString();
+            if (_CARNO.Length < 4)
+            {
+                using (MessageForm form = new MessageForm())
+                {
+                    form.FormTitle = "차량번호오류";
+                    form.Message_1 = "차량번호를 4자리 이상으로";
+                    form.Message_2 = "입력하시기 바랍니다.";
+                    form.ShowDialog();
+                }
+                return;
+            }
+
+            Log.AddLog(string.Concat("차량번호 입력 : ", _CARNO));
+            StringBuilder sb = new StringBuilder();
+            string error = string.Empty;
+
+            // 1. 1차계근 상황일 때,
+            if (_weighingStep == WeighingStep.First)
+            {
+                /*
+                _CVCOD = string.Empty;
+                _CVNAM = string.Empty;
+                _FAXNO = string.Empty;
+                _FAXYN = string.Empty;
+
+                SelectTabPage(3);   // 거래처 선택
+                buttonTab4Next.Visible = false;
+                listBoxCustomers.Visible = false;
+                textBoxCustomer.Text = string.Empty;
+                textBoxCustomer.Focus();
+                */
+
+                buttonTab4Next.Visible = false;
+                listBoxCustomers.Visible = false;
+                // 25.04.28, 차량번호 입력 후 다음화면으로 전환 전에 차량번호 템플릿 조회 후 바인딩
+                _DicParams.Add("CMD", "CAR_TEMPLATE_RETR");
+                _DicParams.Add("CARNO", _CARNO);
+                DataTable dt = GetDataTable(PROCEDURE_ID, _DicParams);
+                if (dt != null)
+                {
+                    if (dt.Rows.Count == 0)
+                    {
+                        _CVCOD = string.Empty;
+                        _CVNAM = string.Empty;
+                        _FAXNO = string.Empty;
+                        _FAXYN = string.Empty;
+
+                        SelectTabPage(3);   // 거래처 선택
+                        textBoxCustomer.Text = string.Empty;
+
+                    }
+                    else if (dt.Rows.Count == 1)
+                    {
+                        _CVCOD = dt.Rows[0]["CVCOD"]?.ToString();
+                        _CVNAM = dt.Rows[0]["CVNAM"]?.ToString();
+                        _ITCOD = dt.Rows[0]["ITCOD"]?.ToString();
+                        _ITNAM = dt.Rows[0]["ITNAM"]?.ToString();
+                        _UCOST = Convert.ToDouble(dt.Rows[0]["UCOST"]?.ToString());
+                        textBoxCustomer.Text = _CVNAM;
+
+                        // 계근화면(Page 4)으로 바로 전환
+                        InitValues();
+                        // 인디케이터가 없는 환경에서 저장 테스트 시 활성화
+                        // Load의 Start() 메서드 주석처리 필요
+                        // 위 InitValues() 메서드의 버튼 비활성화 코드 (테스트용)
+                        //IndicatorTestEnabled();
+                    }
+                    else if (dt.Rows.Count > 1)
+                    {
+                        // 같은 차량번호가 템플릿에 중복등록 되어있다면, 팝업창에서 선택
+                        buttonCarNext.Visible = false;
+                        Gc_Car.DataSource = dt;
+                        SetCustomScrollBar(Gv_Car, vScrollBarCar);
+                        SelectTabPage(9);       // 차량번호 템플릿 조회
+                    }
+                    textBoxCustomer.Focus();
+                }
+            }
+            // 2. 2차계근 상황일 때,
+            if (_weighingStep == WeighingStep.Second)
+            {
+                /*
+                // 2-1. 차량번호에 대한 1차계근 정보 조회
+                // 2차 계근으로 접근한 경우 Mesuring 에서 계근일(TDATE), 차량번호(CARNO) 체크 필요
+                // - 계근일자는 검사하지 않아도 된다고 함
+                string tdate = DateTime.Now.AddDays(-_secondWeighingDay).ToString("yyyy-MM-dd");
+                _DicParams.Add("CMD", "FIRST_MEASURE_RETR");
+                _DicParams.Add("CARNO", _CARNO);
+                _DicParams.Add("TDATE", tdate);
+                _DicParams.Add("JOBGU", _JOBGU);
+                DataTable dt = GetDataTable(PROCEDURE_ID, _DicParams);
+                if (dt != null)
+                {
+                    if (dt.Rows.Count == 1)
+                    {
+                        // 1차실적 정보 바인딩
+                        _SLINO = dt.Rows[0]["SLINO"]?.ToString();               // 전표번호
+                        _TDATE = Convert.ToDateTime(dt.Rows[0]["TDATE"]).ToString("yyyy-MM-dd");  // 계근일자
+                        _SEQNO = dt.Rows[0]["SEQNO"]?.ToString();               // 순번
+                        _CVGUB = dt.Rows[0]["CVGUB"]?.ToString();               // 사업장구분
+                        _CVCOD = dt.Rows[0]["CVCOD"]?.ToString();               // 거래처코드
+                        _CVNAM = dt.Rows[0]["CVNAM"]?.ToString();               // 거래처명
+                        _ITCOD = dt.Rows[0]["ITCOD"]?.ToString();               // 품목코드
+                        _FTIME = dt.Rows[0]["FTIME"]?.ToString();               // 1차계근 시간
+                        _FWEIT = Convert.ToInt32(dt.Rows[0]["FWEIT"]);          //         중량 
+                        _STIME = dt.Rows[0]["STIME"]?.ToString();               // 2차계근 시간
+                        _SWEIT = Convert.ToInt32(dt.Rows[0]["SWEIT"]);          //         중량
+                        _CHKYN = dt.Rows[0]["CHKYN"]?.ToString();               // 검수여부 ("1" 이 아니면 검수필요)
+                        _LWEIT = Convert.ToInt32(dt.Rows[0]["LWEIT"]);          // 감량
+                        _LOSGU = dt.Rows[0]["LOSGU"]?.ToString();               // 감가/감량사유
+                        _LOSNM = dt.Rows[0]["LOSNM"]?.ToString();               // 감가/감량사유
+                        _INSRK = dt.Rows[0]["INSRK"]?.ToString();               // 검수비고
+                        _PLNCD = dt.Rows[0]["PLNCD"]?.ToString();               // 검수자코드
+                        _PLNNM = dt.Rows[0]["PLNNM"]?.ToString();               // 검수자명
+                        _EWEIT = Convert.ToInt32(dt.Rows[0]["EWEIT"]);          // 공차중량
+                        _RWEIT = Convert.ToInt32(dt.Rows[0]["RWEIT"]);          // 실중량
+                        _AWEIT = Convert.ToInt32(dt.Rows[0]["AWEIT"]);          // 인수량
+
+                        _FAXNO = dt.Rows[0]["FAXNO"]?.ToString();               // 팩스번호
+                        //_FAXYN = dt.Rows[0]["FAXYN"]?.ToString();               // 웹팩스 여부
+                    }
+                    else if (dt.Rows.Count == 0)
+                    {
+                        using (MessageForm form = new MessageForm())
+                        {
+                            form.FormTitle = "실적없음";
+
+                            form.Message_1 = "입력하신 차량정보가 없습니다.";
+                            form.Message_2 = "(1차계량 실적없음)";
+                            form.Message_3 = "- 차량번호를 다시 입력하세요.";
+
+                            form.ShowDialog();
+                        }
+
+                        Log.AddLog(string.Concat(_CARNO, " 차량의 1차 계량실적이 존재하지 않습니다."));
+                        return;
+                    }
+                    else
+                    {
+                        using (MessageForm form = new MessageForm())
+                        {
+                            form.FormTitle = "실적중복";
+
+                            form.Message_1 = "차량 계량실적이 중복됩니다.";
+                            form.Message_2 = string.Concat("(1차계량 실적 : ", dt.Rows.Count.ToString(), "건)");
+                            form.Message_3 = "- 사무실로 문의하시기 바랍니다.";
+
+                            form.ShowDialog();
+                        }
+
+                        Log.AddLog(string.Concat(_CARNO, " 차량의 1차 계량실적이 중복됩니다."));
+                        return;
+                    }
+                }
+
+                Log.AddLog(string.Concat("검수확인 - CHKYN : ", _CHKYN, ", ITCOD : ", _ITCOD, ", INSRK : ", _INSRK, ", PLNCD : ", _PLNCD, ", PLNNM : ", _PLNNM));
+
+                // 검수 완료가 된 1차 계근데이터만 2차 계근 수행
+                if (_CHKYN != "1")
+                {
+                    using (MessageForm form = new MessageForm())
+                    {
+                        form.FormTitle = "검수필요";
+
+                        form.Message_1 = "미검수 차량입니다.";
+                        form.Message_2 = "- 검수 후에 계근하세요.";
+
+                        form.ShowDialog();
+                    }
+
+                    Log.AddLog("미검수차량");
+                    return;
+                }
+                
+                // 2차계량은 거래처입력 없음, 완료화면으로 진행
+                // 계량관련 데이터 초기화
+                _weightFlag = false;
+                _weight = 0;
+                _stableCount = 0;
+
+                // 인디케이터 중량안정화 false
+                indicator.Stable = false;
+
+                // 계량진행 플레그 SET
+                _useWeighing = true;
+                SelectTabPage(4);   // 중량확정 & 계량완료
+
+                buttonTab5Complete.Visible = false;
+                buttonTab5Complete.Enabled = true;
+
+                labelWeighingInfo.Text = string.Concat(_CARNO, " 차량중량 확인 후 완료");
+                labelCustomerInfo.Text = _CVNAM;
+                */
+
+                // 25.04.28, 2차계근 클릭 시, 1차계근 리스트 조회화면으로 핸들링
+                MeasureSearch();
+                SelectTabPage(8);   // 1차계근 선택 / 품목 및 감량 검수
+            }
+        }
+        #endregion
+
+        #region 차량번호 템플릿 (Page CarTemp - 9)
+        private void PageCarTemp_Button_Click(object sender, EventArgs e)
+        {
+            Button bt = (Button)sender;
+            // 이전
+            if (bt.Name.Contains("Prev"))
+            {
+                Log.AddLog("이전단계이동");
+                buttonCarNext.Visible = false;
+                SelectTabPage(2);   // 차량번호입력
+            }
+            // 넘어가기
+            else if (bt.Name.Contains("Skip"))
+            {
+                _CVCOD = string.Empty;
+                _CVNAM = string.Empty;
+                _FAXNO = string.Empty;
+                _FAXYN = string.Empty;
+
+                SelectTabPage(3);   // 거래처 선택
+                buttonTab4Next.Visible = false;
+                listBoxCustomers.Visible = false;
+                textBoxCustomer.Text = string.Empty;
+                textBoxCustomer.Focus();
+            }
+            // 다음
+            else if (bt.Name.Contains("Next"))
+            {
+                string SEQNO = Gv_Car.GetFocusedRowCellValue("SEQNO")?.ToString();
+                _DicParams.Add("CMD", "CAR_TEMPLATE_BOUND");
+                _DicParams.Add("SEQNO", SEQNO);
+                DataTable dt = GetDataTable(PROCEDURE_ID, _DicParams);
+                if (dt != null)
+                {
+                    if (dt.Rows.Count == 1)
+                    {
+                        _CVCOD = dt.Rows[0]["CVCOD"]?.ToString();
+                        _CVNAM = dt.Rows[0]["CVNAM"]?.ToString();
+                        _ITCOD = dt.Rows[0]["ITCOD"]?.ToString();
+                        _ITNAM = dt.Rows[0]["ITNAM"]?.ToString();
+                        _UCOST = Convert.ToDouble(dt.Rows[0]["UCOST"]?.ToString());
+                        _RK = dt.Rows[0]["RK"]?.ToString();
+                        textBoxCustomer.Text = _CVNAM;
+
+                        // 계근화면(Page 4)으로 바로 전환
+                        InitValues();
+                        // 인디케이터가 없는 환경에서 저장 테스트 시 활성화
+                        // Load의 Start() 메서드 주석처리 필요
+                        // 위 InitValues() 메서드의 버튼 비활성화 코드 (테스트용)
+                        //IndicatorTestEnabled();
+                    }
+                }
+            }
+        }
+
+        private void Gv_Car_RowClick(object sender, DevExpress.XtraGrid.Views.Grid.RowClickEventArgs e)
+        {
+            string SEQNO = Gv_Car.GetFocusedRowCellValue("SEQNO")?.ToString();
+            if (string.IsNullOrEmpty(SEQNO)) { buttonCarNext.Visible = false; return; }
+
+            buttonCarNext.Visible = true;
+        }
+        #endregion
+
+        #region 거래처 입력 (Page 3)
+        private void Page3_Button_Click(object sender, EventArgs e)
+        {
+            Button bt = (Button)sender;
+            // 검색
+            if (bt.Name.Contains("Search")) { CvSearch(); }
+            // 초기화
+            else if (bt.Name.Contains("Clear"))
+            {
+                listBoxCustomers.Items.Clear();
+                listBoxCustomers.Visible = false;
+                buttonTab4Next.Visible = false;
+                textBoxCustomer.Text = string.Empty;
+                textBoxCustomer.Focus();
+            }
+            // 이전
+            else if (bt.Name.Contains("Prev"))
+            {
+                Log.AddLog("이전단계이동");
+                if (_T_CONFIRM != null && _T_CONFIRM.IsAlive)
+                    //_T_CONFIRM.Abort();
+                    is_AutoComplete = false;
+                SelectTabPage(2);   // 차량번호 입력
+            }
+            // 다음
+            else if (bt.Name.Contains("Next"))
+            {
+                /* 25.04.25, 품목선택 추가 이전 로직
+                InitValues();
+
+                // 1차 계근 시, 해당 페이지에서 전환됨
+                if (_weighingStep == WeighingStep.First)
+                {
+                    // 인디케이터가 없는 환경에서 저장 테스트 시 활성화
+                    // Load의 Start() 메서드 주석처리 필요
+                    // 위 InitValues() 메서드의 버튼 비활성화 코드 테스트용으로 변경 필요
+                    //IndicatorTestEnabled();
+                }
+                */
+                InitItemPage();
+            }
+        }
+
+        // 거래처 검색 메서드 (1차 계량만 수행)
+        private void CvSearch()
+        {
+            string keyword = textBoxCustomer.Text.Trim();
+            if (string.IsNullOrEmpty(keyword))
+                return;
+
+            _DicParams.Add("CMD", "CV_RETR");
+            _DicParams.Add("FIND_WORD", keyword);
+            DataTable dt = GetDataTable(PROCEDURE_ID, _DicParams);
+            if (dt != null)
+            {
+                if (dt.Rows.Count > 0)
+                {
+                    listBoxCustomers.Items.Clear();
+                    listBoxCustomers.Visible = true;
+                    foreach (DataRow dr in dt.Rows)
+                        listBoxCustomers.Items.Add(dr["CVNAM"].ToString());
+                }
+                else
+                {
+                    using (MessageForm form = new MessageForm())
+                    {
+                        form.FormTitle = "거래처 없음";
+                        form.Message_1 = "입력한 단어로 검색된";
+                        form.Message_2 = "거래처가 없습니다.";
+                        form.ShowDialog();
+                    }
+                }
+            }
+            textBoxCustomer.Text = string.Empty;
+            textBoxCustomer.Focus();
+        }
+
+        // 거래처 선택 시, 정보 바인딩 이벤트
+        private void listBoxCustomers_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // 리스트박스 빈칸 선택하면 오류떠서 추가 2022-06-24 정은영
+            if (listBoxCustomers.SelectedItem == null)
+                return;
+
+            // 리스트박스에서 거래처를 선택함
+            string keyword = listBoxCustomers.SelectedItem.ToString();
+            if (string.IsNullOrEmpty(keyword))
+                return;
+
+            listBoxCustomers.Visible = false;
+
+            _DicParams.Add("CMD", "CV_SELECT_RETR");
+            _DicParams.Add("FIND_WORD", keyword);
+            DataTable dt = GetDataTable(PROCEDURE_ID, _DicParams);
+            if (dt != null)
+            {
+                if (dt.Rows.Count > 0)
+                {
+                    _CVCOD = dt.Rows[0]["CVCOD"].ToString();
+                    _CVNAM = dt.Rows[0]["CVNAM"].ToString();
+                    _FAXNO = dt.Rows[0]["FAXNO"].ToString();
+                    _FAXYN = dt.Rows[0]["FAXYN"].ToString();
+
+                    Log.AddLog(string.Concat("거래처 선택결과 : ", _CVNAM, "(", _CVCOD, ")"));
+                    textBoxCustomer.Text = _CVNAM;
+                    textBoxCustomer.Focus();
+                    buttonTab4Next.Visible = true;
+
+                    return;
+                }
+            }
+
+            textBoxCustomer.Text = "";
+            textBoxCustomer.Focus();
+            buttonTab4Next.Visible = false;
+        }
+
+        private void InitItemPage()
+        {
+            Log.AddLog("거래처입력");
+            ItemSearch();
+            SelectTabPage(7);    //  품목 선택
+        }
+
+        // 다음 페이지 관련 변수 초기화 메서드 (품목 선택 → 계근)
+        private void InitValues()
+        {
+            //Log.AddLog("거래처입력");
+            if (_weighingStep == WeighingStep.First)
+            {
+                // 1차계근 시, 패널 이미지
+                panel4.BackgroundImage = Properties.Resources.process_v2_6;
+                Log.AddLog("품목 선택 완료 후, 계근 진입");
+            }
+            else if (_weighingStep == WeighingStep.Second)
+            {
+                // 2차계근 시, 패널 이미지
+                panel4.BackgroundImage = Properties.Resources.process_v2_4_1;
+                Log.AddLog("1차계근 선택 및 검수완료 후, 계근 진입");
+            }
+
+            // 계량관련 데이터 초기화
+            _weightFlag = false;
+            _weight = 0;
+            _stableCount = 0;
+
+            // 인디케이터 중령안정화 false
+            indicator.Stable = false;
+
+            // 계량진행 플레그 SET
+            _useWeighing = true;
+
+            SelectTabPage(4);   // 중량확정 & 계량완료
+            labelWeighingInfo.Text = string.Concat(_CARNO, " 차량중량 확인 후 완료");
+            labelCustomerInfo.Text = _CVNAM + "  -  " + _ITNAM;
+
+            // 실 운영용
+            buttonTab5Complete.Visible = false;
+            buttonTab5Complete.Enabled = false;
+
+            // 테스트용
+            //buttonTab5Complete.Visible = true;
+            //buttonTab5Complete.Enabled = true;
+
+
+            //테스트용 코드 - 2차계근에서만 완료 버튼 보이게
+            if (_weighingStep == WeighingStep.Second)
+            {
+                buttonTab5Complete.Visible = true;
+                buttonTab5Complete.Enabled = true;
+            }
+            else
+            {
+                buttonTab5Complete.Visible = false;
+                buttonTab5Complete.Enabled = false;
+            }
+            //여기까지 테스트용 코드
+        }
+        #endregion
+
+        #region 품목 선택 (Page Item - 7)
+        private void PageItem_Button_Click(object sender, EventArgs e)
+        {
+            Button bt = (Button)sender;
+            // 검색
+            if (bt.Name.Contains("Search")) { ItemSearch(); }
+            // 초기화
+            else if (bt.Name.Contains("Clear"))
+            {
+                buttonItemNext.Visible = false;
+                Tx_Item.Text = string.Empty;
+                ItemSearch();
+                Tx_Item.Focus();
+            }
+            // 이전
+            else if (bt.Name.Contains("Prev"))
+            {
+                Log.AddLog("이전단계이동");
+                if (_T_CONFIRM != null && _T_CONFIRM.IsAlive)
+                    //_T_CONFIRM.Abort();
+                    is_AutoComplete = false;
+
+                _CVCOD = string.Empty;
+                _CVNAM = string.Empty;
+                _FAXNO = string.Empty;
+                _FAXYN = string.Empty;
+
+                SelectTabPage(3);   // 거래처 입력
+                buttonTab4Next.Visible = false;
+                buttonTab5Next.Visible = false;
+                textBoxCustomer.Focus();
+            }
+            // 다음
+            else if (bt.Name.Contains("Next"))
+            {
+                InitValues();
+
+                // 1차 계근 시, 해당 페이지에서 전환됨
+                if (_weighingStep == WeighingStep.First)
+                {
+                    // 인디케이터가 없는 환경에서 저장 테스트 시 활성화
+                    // Load의 Start() 메서드 주석처리 필요
+                    // 위 InitValues() 메서드의 버튼 비활성화 코드
+                    //IndicatorTestEnabled();
+                }
+            }
+        }
+
+        private void ItemSearch()
+        {
+            buttonItemNext.Visible = false;
+
+            string WORD = Tx_Item.Text?.ToString();
+            _DicParams.Add("CMD", "ITEM_SELECT_RETR");
+            _DicParams.Add("FIND_WORD", WORD);
+            DataTable dt = GetDataTable(PROCEDURE_ID, _DicParams);
+            if (dt != null)
+            {
+                Gc_Item.DataSource = dt;
+                SetCustomScrollBar(Gv_Item, vScrollBarItem);
+            }
+        }
+
+        private void SetCustomScrollBar(GridView view, DevExpress.XtraEditors.VScrollBar vsbar)
+        {
+            this.BeginInvoke(new Action(() =>
+            {
+                // 전체 Row 개수 - 화면에 표시 가능한 Row 수 만큼 스크롤 범위 설정
+                int totalRows = view.RowCount + 1;   // +1 이 없으면, 맨 마지막 행이 반 정도 잘림
+                int visibleRows = GetVisibleRowCount(view);
+                if (totalRows == 1) { vsbar.Visible = false; }// 0개 Row
+                else
+                {
+                    if (totalRows > visibleRows)
+                    {
+                        vsbar.Visible = true;
+                        vsbar.Minimum = 0;
+                        vsbar.Maximum = totalRows - visibleRows;
+                        vsbar.SmallChange = 1;
+                        vsbar.LargeChange = 1;
+                    }
+                    else { vsbar.Visible = false; }
+                }
+            }));
+        }
+
+        private int GetVisibleRowCount(GridView view)
+        {
+            if (view.RowCount == 0)
+                return 0;
+
+            // View의 그리드 영역 높이 가져오기
+            int viewHeight = view.ViewRect.Height;
+
+            // 한 행의 높이 가져오기
+            int rowHeight = view.RowHeight;
+
+            // 전체 높이 / 행 높이 = 보이는 행 개수
+            return rowHeight > 0 ? viewHeight / rowHeight : 0;
+        }
+
+        private void Gv_Item_RowClick(object sender, DevExpress.XtraGrid.Views.Grid.RowClickEventArgs e)
+        {
+            _ITCOD = Gv_Item.GetFocusedRowCellValue("ITCOD")?.ToString();
+            _ITNAM = Gv_Item.GetFocusedRowCellValue("ITNAM")?.ToString();
+            string OCOST = string.IsNullOrEmpty(Gv_Item.GetFocusedRowCellValue("OCOST")?.ToString()) ? "0.00" : Gv_Item.GetFocusedRowCellValue("OCOST")?.ToString();
+            _UCOST = Convert.ToDouble(OCOST);
+            _RK = Gv_Item.GetFocusedRowCellValue("RK")?.ToString();
+
+            if (!string.IsNullOrEmpty(_ITCOD))
+                buttonItemNext.Visible = true;
+            else
+            {
+                _UCOST = 0.00;
+                buttonItemNext.Visible = false;
+            }
+        }
+        #endregion
+
+        #region 1차계근 선택 / 품목 및 감량 검수 (Page List - 8)
+        private void PageList_Button_Click(object sender, EventArgs e)
+        {
+            Button bt = (Button)sender;
+            // 검색
+            if (bt.Name.Contains("Search")) { MeasureSearch(); }
+            // 초기화
+            else if (bt.Name.Contains("Clear"))
+            {
+                buttonListNext.Visible = false;
+                Tx_Word.Text = string.Empty;
+                MeasureSearch();
+                Tx_Word.Focus();
+            }
+            // 이전
+            else if (bt.Name.Contains("Prev"))
+            {
+                Log.AddLog("이전단계이동");
+                if (_T_CONFIRM != null && _T_CONFIRM.IsAlive)
+                    //_T_CONFIRM.Abort();
+                    is_AutoComplete = false;
+
+                _SLINO = string.Empty;
+                Lk_ITCOD.EditValue = string.Empty;
+                Tx_LWEIT.EditValue = 0;
+                Tx_UCOST.EditValue = 0.00;
+                SelectTabPage(1);   // 계근 선택
+            }
+            // 다음
+            else if (bt.Name.Contains("Next"))
+            {
+                FirstMeasureBound();
+                InitValues();
+                // 2차 계근 시, 해당 페이지에서 전환됨
+                if (_weighingStep == WeighingStep.Second)
+                {
+                    // 인디케이터가 없는 환경에서 저장 테스트 시 활성화
+                    // Load의 Start() 메서드 주석처리 필요
+                    // 위 InitValues() 메서드의 버튼 비활성화 코드 테스트용으로 변경 필요
+                    //IndicatorTestEnabled();
+                }
+            }
+        }
+
+        // 1차 계근 조회
+        private void MeasureSearch()
+        {
+            buttonListNext.Visible = false;
+            Lk_ITCOD.EditValue = string.Empty;
+            Tx_LWEIT.EditValue = 0;
+            Tx_UCOST.EditValue = 0.00;
+            Tx_Rk.EditValue = string.Empty;
+
+            string WORD = Tx_Word.Text?.ToString();
+            _DicParams.Add("CMD", "MEASURE_SELECT_RETR");
+            _DicParams.Add("JOBGU", _JOBGU);
+            _DicParams.Add("CVGUB", _CVGUB);
+            _DicParams.Add("FIND_WORD", WORD);
+            DataTable dt = GetDataTable(PROCEDURE_ID, _DicParams);
+            if (dt != null)
+            {
+                Gc_List.DataSource = dt;
+                SetCustomScrollBar(Gv_List, vScrollBarList);
+            }
+        }
+
+        private void Gv_List_RowClick(object sender, DevExpress.XtraGrid.Views.Grid.RowClickEventArgs e)
+        {
+            string SLINO = Gv_List.GetFocusedRowCellValue("SLINO")?.ToString();
+            Lk_ITCOD.EditValue = Gv_List.GetFocusedRowCellValue("ITCOD")?.ToString();
+            Tx_LWEIT.EditValue = 0;
+            Tx_UCOST.EditValue = Gv_List.GetFocusedRowCellValue("UCOST")?.ToString();
+            Tx_Rk.EditValue = Gv_List.GetFocusedRowCellValue("RK")?.ToString();
+
+            if (!string.IsNullOrEmpty(SLINO))
+            {
+                _SLINO = SLINO;
+                buttonListNext.Visible = true;
+            }
+            else
+            {
+                _SLINO = string.Empty;
+                Lk_ITCOD.EditValue = string.Empty;
+                Tx_LWEIT.EditValue = 0;
+                Tx_UCOST.EditValue = 0.00;
+                buttonListNext.Visible = false;
+            }
+        }
+
+        private void Lk_ITCOD_EditValueChanged(object sender, EventArgs e)
+        {
+            _ITCOD = Lk_ITCOD.EditValue?.ToString();
+            _ITNAM = Lk_ITCOD.Text;
+
+            // 25.05.12 추가, 품목 변경에 따른 비고 자동 할당
+            _DicParams.Add("CMD", "ITEM_RK_RETR");
+            _DicParams.Add("ITCOD", _ITCOD);
+            DataTable dt = GetDataTable(PROCEDURE_ID, _DicParams);
+            if (dt != null)
+            {
+                if (dt.Rows.Count > 0) { Tx_Rk.Text = dt.Rows[0]["RK"]?.ToString(); }
+                else { Tx_Rk.Text = string.Empty; }
+                _RK = Tx_Rk.Text;
+            }
+        }
+
+        private void FirstMeasureBound()
+        {
+            if (string.IsNullOrEmpty(_SLINO)) { return; }
+
+            _DicParams.Add("CMD", "FIRST_MEASURE_BOUND");
+            _DicParams.Add("SLINO", _SLINO);
+            DataTable dt = GetDataTable(PROCEDURE_ID, _DicParams);
+            if (dt != null)
+            {
+                if (dt.Rows.Count > 0)
+                {
+                    _SEQNO = dt.Rows[0]["SEQNO"]?.ToString();
+                    _CVCOD = dt.Rows[0]["CVCOD"]?.ToString();
+                    _CVNAM = dt.Rows[0]["CVNAM"]?.ToString();
+                    _ITCOD = Lk_ITCOD.EditValue?.ToString();
+                    _ITNAM = Lk_ITCOD.Text;
+                    _PLNCD = dt.Rows[0]["PLNCD"]?.ToString();
+                    _JOBGU = dt.Rows[0]["JOBGU"]?.ToString();
+                    _CARNO = dt.Rows[0]["CARNO"]?.ToString();
+                    _INSRK = dt.Rows[0]["INSRK"]?.ToString();
+                    _FWEIT = Convert.ToInt32(dt.Rows[0]["FWEIT"]?.ToString());
+                    _FTIME = dt.Rows[0]["FTIME"]?.ToString();
+                    _LOSGU = dt.Rows[0]["LOSGU"]?.ToString();
+                    _LWEIT = Convert.ToInt32(Tx_LWEIT.EditValue?.ToString());
+                    _UCOST = Convert.ToDouble(Tx_UCOST.EditValue?.ToString());
+                    _RK = dt.Rows[0]["RK"]?.ToString();
+                }
+            }
+        }
+        #endregion
+
+        #region 중량확정 & 계량완료 (Page 4)
+        private void Page4_Button_Click(object sender, EventArgs e)
+        {
+            Button bt = (Button)sender;
+            // 완료
+            if (bt.Name.Contains("Complete")) { _isYolo = true; SaveProdf(); }
+            // 이전
+            else if (bt.Name.Contains("Prev"))
+            {
+                Log.AddLog("이전단계이동");
+
+                _confirm = ConfirmYN.NonConfirm;
+                _state = WeighingState.None;
+                _useWeighing = false;
+                if (_T_CONFIRM != null && _T_CONFIRM.IsAlive)
+                    //_T_CONFIRM.Abort();
+                    is_AutoComplete = false;
+
+                // 1차 계근
+                if (_weighingStep == WeighingStep.First)
+                {
+                    /*
+                    _CVCOD = string.Empty;
+                    _CVNAM = string.Empty;
+                    _FAXNO = string.Empty;
+                    _FAXYN = string.Empty;
+
+                    SelectTabPage(3);   // 거래처 입력
+                    buttonTab4Next.Visible = false;
+                    buttonTab5Next.Visible = false;
+                    textBoxCustomer.Focus();
+                    */
+
+                    _ITCOD = string.Empty;
+                    _ITNAM = string.Empty;
+                    _UCOST = 0.00;
+
+                    ItemSearch();
+                    SelectTabPage(7);   // 품목 선택
+                    buttonItemNext.Visible = false;
+                    buttonTab5Next.Visible = false;
+                    Tx_Item.Focus();
+                }
+
+                // 2차 계근
+                if (_weighingStep == WeighingStep.Second)
+                {
+                    //SelectTabPage(2);   // 차량번호 입력
+                    MeasureSearch();
+                    SelectTabPage(8);    // 1차계근 선택 / 품목 및 감량 검수
+                }
+            }
+            else if (bt.Name.Contains("Next")) { _isYolo = false; SaveProdf(); }
+        }
+
+        bool _isYolo = false;
+        // 계량 완료 후, 데이터 저장 메서드
+        private void SaveProdf()
+        {
+            /* Yolo 주석처리
+            // 25.01.16 추가
+            // Yolo 프로그램 소켓 통신
+            // 신호 보내고, 대기 (타임아웃 시간 30초)
+            // 30초 내에 분석결과 도착하면 처리
+            // 결과가 1 : 진행, 2 : 부적합메시지, 3 : Yolo 프로그램 쪽 이슈 메시지
+            if (_isYolo)
+                if (!YoloTransfer())
+                    return;
+            */
+
+            //2020-12-10 추가
+            //자동등록 방지를 위하여 Confirm처리
+            _confirm = ConfirmYN.Confirm;
+
+            // 완료처리
+            _state = WeighingState.Complete;
+            Log.AddLog("계량상태 변경 : Stable -> Complete");
+
+            // 버튼 비활성화
+            SetCompleteButton2(false);
+            SetPrvButton2(false);
+
+            string imageFile = string.Empty;
+            string appPath = Application.StartupPath;
+            DateTime now = DateTime.Now;
+
+            try
+            {
+                #region 1차계량
+                if (_weighingStep == WeighingStep.First)
+                {
+                    // 1. 1차 계량실적 저장
+                    string SLINO = string.IsNullOrEmpty(_SLINO) ? gp_NextSlipNo("W", DateTime.Now.ToString("yyMMdd"), "SLINO", "MEASURE") : _SLINO;
+                    string TDATE = now.ToString("yyyy-MM-dd");
+
+                    _DicParams.Add("CMD", "MEASURE_SAVE");
+                    _DicParams.Add("SLINO", SLINO);
+                    _DicParams.Add("SEQNO", string.Empty);
+                    _DicParams.Add("CVCOD", _CVCOD);
+                    _DicParams.Add("CVGUB", _CVGUB);
+                    //_DicParams.Add("ITCOD", string.Empty);
+                    _DicParams.Add("ITCOD", _ITCOD);
+                    _DicParams.Add("PLNCD", string.Empty);
+                    _DicParams.Add("TDATE", TDATE);
+                    _DicParams.Add("JOBGU", _JOBGU);
+                    _DicParams.Add("CARNO", _CARNO);
+                    _DicParams.Add("INSRK", string.Empty);
+                    _DicParams.Add("FWEIT", _weight);
+                    _DicParams.Add("SWEIT", 0);
+                    _DicParams.Add("FTIME", now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    _DicParams.Add("STIME", string.Empty);
+                    _DicParams.Add("EWEIT", 0);
+                    _DicParams.Add("RWEIT", 0);
+                    _DicParams.Add("AWEIT", 0);
+                    _DicParams.Add("LWEIT", 0);
+                    _DicParams.Add("UCOST", _UCOST);
+                    _DicParams.Add("LOSGU", string.Empty);
+                    _DicParams.Add("RK", _RK);
+                    _DicParams.Add("USRCD", "00000");
+                    DataTable dt = GetDataTable(PROCEDURE_ID, _DicParams);
+                    if (dt != null)
+                    {
+                        if (dt.Rows.Count > 0)
+                        {
+                            string RST = dt.Rows[0]["RST"]?.ToString();
+                            string MSG = dt.Rows[0]["MSG"]?.ToString();
+                            if (RST.Equals("1"))
+                            {
+                                Log.AddLog(string.Concat("1차 계량완료 - ", _weight.ToString(), "kg"));
+                            }
+                            else
+                            {
+                                QuitwithLog_Page4(MSG);
+                            }
+                        }
+                    }
+
+                    // 2. 1차실적 차량이미지 저장
+                    if (_saveImage)
+                    {
+                        // 2-1. 이미지 저장경로 지정
+                        string saveFolder = string.Concat(appPath, @"\image\");
+                        // 2-2. 이미지 저장경로 확인 및 생성
+                        if (!System.IO.Directory.Exists(saveFolder))
+                            System.IO.Directory.CreateDirectory(saveFolder);
+                        // 2-3. RTSP 이미지 저장(디버그 image폴더에 저장)
+                        RTSP_IMAGE_SAVE(saveFolder, SLINO, "1");
+
+                        // 3. 2-3번 과정 성공 시, FTP 파일 전송
+                        // 3-1. 파일이 생성되어 있는지 검사
+                        int cnt = 0;
+                        bool result = false;
+                        string file1_1 = string.Concat(saveFolder, SLINO, "_1_1.jpg");     // 1차 - 1번
+                        string file1_2 = string.Concat(saveFolder, SLINO, "_1_2.jpg");     //     - 2번
+                        //string file1_3 = string.Concat(saveFolder, SLINO, "_1_3.jpg");     //     - 3번
+                        string file2_1 = string.Concat(saveFolder, SLINO, "_2_1.jpg");     // 1차 - 1번
+                        string file2_2 = string.Concat(saveFolder, SLINO, "_2_2.jpg");     //     - 2번
+                        //string file2_3 = string.Concat(saveFolder, SLINO, "_2_3.jpg");     //     - 3번
+                        while (cnt < 13)
+                        {
+                            cnt++;
+                            System.Threading.Thread.Sleep(500);
+
+                            //if (File.Exists(file1_1) && File.Exists(file1_2) && File.Exists(file1_3) && File.Exists(file2_1) && File.Exists(file2_2) && File.Exists(file2_3))
+                            if (File.Exists(file1_1) && File.Exists(file1_2) && File.Exists(file2_1) && File.Exists(file2_2))
+                            {
+                                result = true;
+                                break;
+                            }
+                        }
+
+                        // 3-2. 이미지 복사경로 지정
+                        string uploadFolder = string.Concat(appPath, @"\image\upload\");
+                        // 3-3. 이미지 복사경로 확인 및 생성
+                        if (!System.IO.Directory.Exists(uploadFolder))
+                            System.IO.Directory.CreateDirectory(uploadFolder);
+
+                        // 3-4. 2-3번에서 생성된 이미지 경로 담기
+                        //string[] file = new string[6] { file1_1, file1_2, file1_3, file2_1, file2_2, file2_3 };
+                        string[] file = new string[4] { file1_1, file1_2, file2_1, file2_2 };
+                        //// 3-5. 디렉토리 이미지 복사(MES에 보여주기위해 image/upload 파일에 복사)
+                        //RTSP_IMAGE_COPY(uploadFolder, SLINO, TDATE, "1", file);
+
+                        // 4. FTP 업로드 (1차 계근 이미지)
+                        FTP_FILE_UPLOAD(file, TDATE);
+                    }
+                }
+                #endregion
+
+                #region 2차계량
+                if (_weighingStep == WeighingStep.Second)
+                {
+                    // 2회 계량실적 중량이 같을 경우
+                    if (_FWEIT == _weight)
+                    {
+                        using (MessageForm form = new MessageForm())  //테스트용(실제사용시 주석해제)
+                        {
+                            form.FormTitle = "계량오류";
+
+                            form.Message_1 = "계량 중량이 잘못되었습니다.";
+                            form.Message_2 = "(1, 2차 계량중량이 동일합니다)";
+                            form.Message_3 = "- 사무실로 문의하시기 바랍니다.";
+
+                            if (form.ShowDialog() == DialogResult.Cancel)
+                            {
+                                //SelectTabPage(3);   //메세지 확인 이후 거래처선택 으로 이동
+                                _state = WeighingState.Stable;
+                                _useWeighing = false;
+                                InitWeighingValue();
+                                //InitVehicleNumber();
+                                SetCompleteButton2(true);
+                                SetPrvButton2(true);
+                                return;
+                            }
+                        }
+                    }
+
+                    // 1. 1차 계량실적에 2차정보 기록
+                    // - 입고실적 (1차실적 컬럼에 값을 넣는다)
+                    string SLINO = string.IsNullOrEmpty(_SLINO) ? gp_NextSlipNo("W", DateTime.Now.ToString("yyMMdd"), "SLINO", "MEASURE") : _SLINO;
+                    string TDATE = now.ToString("yyyy-MM-dd");
+
+                    // 1-1. 중량관련 데이터 자동계산
+                    AUTO_WEIGHT_CALCULATE();
+                    _DicParams.Add("CMD", "MEASURE_SAVE");
+                    _DicParams.Add("SLINO", SLINO);
+                    _DicParams.Add("SEQNO", _SEQNO);
+                    _DicParams.Add("CVCOD", _CVCOD);
+                    _DicParams.Add("ITCOD", _ITCOD);
+                    _DicParams.Add("PLNCD", _PLNCD);
+                    _DicParams.Add("TDATE", TDATE);
+                    _DicParams.Add("JOBGU", _JOBGU);
+                    _DicParams.Add("CARNO", _CARNO);
+                    _DicParams.Add("INSRK", _INSRK);
+                    _DicParams.Add("FWEIT", _FWEIT);
+                    _DicParams.Add("SWEIT", _weight);
+                    _DicParams.Add("FTIME", _FTIME);
+                    _DicParams.Add("STIME", now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    _DicParams.Add("EWEIT", _EWEIT);
+                    _DicParams.Add("RWEIT", _RWEIT);
+                    _DicParams.Add("AWEIT", _AWEIT);
+                    _DicParams.Add("LWEIT", _LWEIT);
+                    _DicParams.Add("LOSGU", _LOSGU);
+                    _DicParams.Add("UCOST", _UCOST);
+                    _DicParams.Add("RK", _RK);
+                    _DicParams.Add("USRCD", "00000");
+                    DataTable dt = GetDataTable(PROCEDURE_ID, _DicParams);
+                    if (dt != null)
+                    {
+                        if (dt.Rows.Count > 0)
+                        {
+                            string RST = dt.Rows[0]["RST"]?.ToString();
+                            string MSG = dt.Rows[0]["MSG"]?.ToString();
+                            if (RST.Equals("1"))
+                            {
+                                Log.AddLog(string.Concat("2차 계량완료 - ", _weight.ToString(), "kg"));
+                            }
+                            else
+                            {
+                                QuitwithLog_Page4(MSG);
+                            }
+                        }
+                    }
+
+                    // 2. 2차실적 차량이미지 저장
+                    if (_saveImage)
+                    {
+                        imageFile = string.Concat
+                        (
+                            "!",
+                            string.Concat(Application.StartupPath, @"\image\", SLINO, "_2_").PadRight(126),
+                            //string.Concat(@"D:\", _CARNO, "_2_").PadRight(126),
+                            "@"
+                        );
+
+                        // 2-1. 이미지 저장경로 지정
+                        string saveFolder = string.Concat(appPath, @"\image\");
+                        // 2-2. 이미지 저장경로 확인 및 생성
+                        if (!System.IO.Directory.Exists(saveFolder))
+                            System.IO.Directory.CreateDirectory(saveFolder);
+
+                        RTSP_IMAGE_SAVE(saveFolder, SLINO, "2");
+
+                        // 3. 2-3번 과정 성공 시, FTP 파일 전송
+                        // 3-1. 파일이 생성되어 있는지 검사
+                        int cnt = 0;
+                        bool result = false;
+                        string file_1 = string.Concat(appPath, @"\image\", SLINO, "_2_1.jpg");     // 2차 - 1번
+                        string file_2 = string.Concat(appPath, @"\image\", SLINO, "_2_2.jpg");     //     - 2번
+                        //string file_3 = string.Concat(appPath, @"\image\", SLINO, "_2_3.jpg");     //     - 3번
+                        while (cnt < 16)
+                        {
+                            cnt++;
+                            System.Threading.Thread.Sleep(500);
+
+                            //if (File.Exists(file_1) && File.Exists(file_2) && File.Exists(file_3))
+                            if (File.Exists(file_1) && File.Exists(file_2))
+                            {
+                                result = true;
+                                break;
+                            }
+                        }
+                        // 3-2. 이미지 복사경로 지정
+                        string deskFolder = string.Concat(appPath, @"\image\upload\");
+                        // 3-3. 이미지 복사경로 확인 및 생성
+                        if (!System.IO.Directory.Exists(deskFolder))
+                            System.IO.Directory.CreateDirectory(deskFolder);
+                        // 3-4. 2-3번에서 생성된 이미지 경로 담기
+                        //string[] file = new string[3] { file_1, file_2, file_3 };
+                        string[] file = new string[2] { file_1, file_2 };
+                        //// 3-5. 디렉토리 이미지 복사
+                        //RTSP_IMAGE_COPY(deskFolder, SLINO, TDATE, "2", file);
+
+                        // 4. FTP 업로드 (2차 계근 이미지)
+                        FTP_FILE_UPLOAD(file, TDATE);
+                    }
+
+                    // 4. 이미지 파일관련 정리
+                    // 4-1. 이미지파일 경로 할당
+                    _selectedTicketImage_1_1 = string.Concat(appPath, @"\image\", _SLINO, "_1_1.jpg");
+                    _selectedTicketImage_1_2 = string.Concat(appPath, @"\image\", _SLINO, "_1_2.jpg");
+                    //_selectedTicketImage_1_3 = string.Concat(appPath, @"\image\", _SLINO, "_1_3.jpg");
+                    _selectedTicketImage_2_1 = string.Concat(appPath, @"\image\", _SLINO, "_2_1.jpg");
+                    _selectedTicketImage_2_2 = string.Concat(appPath, @"\image\", _SLINO, "_2_2.jpg");
+                    //_selectedTicketImage_2_3 = string.Concat(appPath, @"\image\", _SLINO, "_2_3.jpg");
+                    // 4-2. 전표출력용 임시파일 경로 할당
+                    string tmpImage_1_1 = string.Concat(appPath, @"\image\print\1_1.jpg");
+                    string tmpImage_1_2 = string.Concat(appPath, @"\image\print\1_2.jpg");
+                    //string tmpImage_1_3 = string.Concat(appPath, @"\image\print\1_3.jpg");
+                    string tmpImage_2_1 = string.Concat(appPath, @"\image\print\2_1.jpg");
+                    string tmpImage_2_2 = string.Concat(appPath, @"\image\print\2_2.jpg");
+                    //string tmpImage_2_3 = string.Concat(appPath, @"\image\print\2_3.jpg");
+                    // 4-3. 이전 전표출력용 파일이 있을 경우 삭제한다
+                    if (File.Exists(tmpImage_1_1)) File.Delete(tmpImage_1_1);
+                    if (File.Exists(tmpImage_1_2)) File.Delete(tmpImage_1_2);
+                    //if (File.Exists(tmpImage_1_3)) File.Delete(tmpImage_1_3);
+                    if (File.Exists(tmpImage_2_1)) File.Delete(tmpImage_2_1);
+                    if (File.Exists(tmpImage_2_2)) File.Delete(tmpImage_2_2);
+                    //if (File.Exists(tmpImage_2_3)) File.Delete(tmpImage_2_3);
+                    // 4-4. 출력용 임시파일 복사
+                    if (File.Exists(_selectedTicketImage_1_1)) File.Copy(_selectedTicketImage_1_1, tmpImage_1_1);
+                    if (File.Exists(_selectedTicketImage_1_2)) File.Copy(_selectedTicketImage_1_2, tmpImage_1_2);
+                    //if (File.Exists(_selectedTicketImage_1_3)) File.Copy(_selectedTicketImage_1_3, tmpImage_1_3);
+                    if (File.Exists(_selectedTicketImage_2_1)) File.Copy(_selectedTicketImage_2_1, tmpImage_2_1);
+                    if (File.Exists(_selectedTicketImage_2_2)) File.Copy(_selectedTicketImage_2_2, tmpImage_2_2);
+                    //if (File.Exists(_selectedTicketImage_2_3)) File.Copy(_selectedTicketImage_2_3, tmpImage_2_3);
+                    // 4-5. 출력 이미지 바인딩 (이미지가 없으면 No Image 표시)
+                    BINDING_IMAGE(tmpImage_1_1, pictureBoxIn1);
+                    BINDING_IMAGE(tmpImage_1_2, pictureBoxIn2);
+                    //BINDING_IMAGE(tmpImage_1_3, pictureBoxIn3);
+                    BINDING_IMAGE(tmpImage_2_1, pictureBoxOut1);
+                    BINDING_IMAGE(tmpImage_2_2, pictureBoxOut2);
+                    //BINDING_IMAGE(tmpImage_2_3, pictureBoxOut3);
+
+                    // 5. 전표(계량증명서) 출력 (테스트 시 전표, 팩스 주석처리)
+                    if (_ticketPrint)
+                    {
+                        using (PrintForm form = new PrintForm())
+                        {
+                            DialogResult result = form.ShowDialog();
+                            if (result == DialogResult.Yes)
+                            {
+                                Log.AddLog("계량전표출력");
+                                //printDocument.Print();
+
+                                Dictionary<string, Image> dicPicture = new Dictionary<string, Image>();
+                                dicPicture.Add("1_1", null);
+                                dicPicture.Add("1_2", null);
+                                dicPicture.Add("2_1", null);
+                                dicPicture.Add("2_2", null);
+                                Dictionary<string, Image> dicCopy = new Dictionary<string, Image>();
+                                foreach (KeyValuePair<string, Image> item in dicPicture)
+                                {
+                                    Image img = null;
+                                    if (item.Key.Equals("1_1")) { img = pictureBoxIn1.BackgroundImage; }
+                                    else if (item.Key.Equals("1_2")) { img = pictureBoxIn2.BackgroundImage; }
+                                    else if (item.Key.Equals("2_1")) { img = pictureBoxOut1.BackgroundImage; }
+                                    else if (item.Key.Equals("2_2")) { img = pictureBoxOut2.BackgroundImage; }
+                                    dicCopy.Add(item.Key, img);
+                                }
+
+                                _DicParams.Add("CMD", "MEASURE_PRINT_RETR");
+                                _DicParams.Add("SLINO", SLINO);
+                                DataTable dtPrint = GetDataTable("DP_SA015F00", _DicParams);
+
+                                if (dtPrint != null && dtPrint.Rows.Count > 0)
+                                {
+                                    if (!dtPrint.Columns.Contains("JOBGU"))
+                                    {
+                                        dtPrint.Columns.Add("JOBGU", typeof(string));
+                                    }
+
+                                    dtPrint.Rows[0]["JOBGU"] = _JOBGU;
+                                }
+
+                                if (dtPrint != null)
+                                {
+                                    /* 25.05.19 수정, 무인계근에서는 A5 사이즈로 출력되도록
+                                    // A4 사이즈로 자동출력
+                                    Measure_Doc measure_doc = new Measure_Doc(dtPrint, dicCopy);
+                                    ReportPrintTool printTool = new ReportPrintTool(measure_doc);
+                                    measure_doc.DataSource = dtPrint;
+                                    this.Name = "계량증명서";
+                                    measure_doc.CreateDocument();
+                                    // 대화상자 없이 바로 출력
+                                    printTool.PrintingSystem.ShowPrintStatusDialog = false; // 상태 표시 안 함
+                                    printTool.PrintingSystem.ShowMarginsWarning = false;    // 용지 불일치 경고 표시 안 함
+                                    // 설정된 기본 프린터로 자동 출력
+                                    printTool.Print();
+                                    // 프린터 선택 창을 띄워 사용자가 선택 후 출력
+                                    //printTool.PrintDialog();
+                                    */
+
+                                    XtraReport xr = new XtraReport();
+                                    xr.PaperKind = System.Drawing.Printing.PaperKind.A5;
+                                    // 보관용
+                                    Measure_Doc_A5 measure_doc_in = new Measure_Doc_A5(dtPrint, dicCopy, "IN");
+                                    measure_doc_in.DataSource = dtPrint;
+                                    this.Name = "계량증명서";
+                                    measure_doc_in.CreateDocument();
+                                    foreach (DevExpress.XtraPrinting.Page page in measure_doc_in.Pages) { xr.Pages.Add(page); }
+                                    // 제출용
+                                    Measure_Doc_A5 measure_doc_out = new Measure_Doc_A5(dtPrint, dicCopy, "OUT");
+                                    measure_doc_out.DataSource = dtPrint;
+                                    this.Name = "계량증명서";
+                                    measure_doc_out.CreateDocument();
+                                    foreach (DevExpress.XtraPrinting.Page page in measure_doc_out.Pages) { xr.Pages.Add(page); }
+
+                                    ReportPrintTool printTool = new ReportPrintTool(xr);
+                                    // 대화상자 없이 바로 출력
+                                    printTool.PrintingSystem.ShowPrintStatusDialog = false; // 상태 표시 안 함
+                                    printTool.PrintingSystem.ShowMarginsWarning = false;    // 용지 불일치 경고 표시 안 함
+                                    // 설정된 기본 프린터로 자동 출력
+                                    printTool.Print();
+                                }
+                            }
+                        }
+                    }
+                    /*
+                    // 6. WebFax 전송대상일 경우 해당 전표이미지 발송
+                    if (_selectedWebFaxYN.Trim().ToUpper() == "Y")
+                    {
+                        string weighingType = string.Empty;
+                        string fullWeight = string.Empty;
+                        string emptyWeight = string.Empty;
+                        int netWeight = 0;
+                        int chaGam = 0;
+
+                        if (_weighingType == WeighingType.In)
+                        {
+                            weighingType = "입고";
+                            //fullWeight = string.Concat((_selectedFirstWeight.ToString() + "KG").PadRight(15), _selectedFirstTime.Substring(11, 5));
+                            //emptyWeight = string.Concat((_selectedSecondWeight.ToString() + "KG").PadRight(15), _selectedSecondTime.Substring(11, 5));
+
+                            string secTime = string.Empty;
+                            string firTime = string.Empty;
+
+                            if (_selectedSecondTime.Length > 11)
+                            {
+                                secTime = _selectedSecondTime.Substring(11, 5);
+                            }
+
+                            if (_selectedFirstTime.Length > 11)
+                            {
+                                firTime = _selectedFirstTime.Substring(11, 5);
+                            }
+
+                            fullWeight = string.Concat((_selectedSecondWeight.ToString() + "KG").PadRight(15), secTime);
+                            emptyWeight = string.Concat((_selectedFirstWeight.ToString() + "KG").PadRight(15), firTime);
+                            netWeight = _selectedSecondWeight - _selectedFirstWeight - _selectediChaGam;
+                            chaGam = _selectediChaGam;
+                        }
+                        if (_weighingType == WeighingType.Out)
+                        {
+                            string secTime = string.Empty;
+                            string firTime = string.Empty;
+
+                            if (_selectedSecondTime.Length > 11)
+                            {
+                                secTime = _selectedSecondTime.Substring(11, 5);
+                            }
+
+                            if (_selectedFirstTime.Length > 11)
+                            {
+                                firTime = _selectedFirstTime.Substring(11, 5);
+                            }
+
+                            weighingType = "출고";
+                            fullWeight = string.Concat((_selectedSecondWeight.ToString() + "KG").PadRight(15), secTime);
+                            emptyWeight = string.Concat((_selectedFirstWeight.ToString() + "KG").PadRight(15), firTime);
+                            netWeight = _selectedSecondWeight - _selectedFirstWeight - _selectedOChaGam;
+                            chaGam = _selectedOChaGam;
+                        }
+
+                        // - 결과 텍스트 기록
+                        label1.Text = _selectedDealerNm;                        // 거래처명
+                        label2.Text = _selectedJ_Date;                          // 일자
+                        label3.Text = weighingType;                             // 입출고
+                        label4.Text = _selectedSun;                             // 계근번호
+                        label5.Text = _selectedGubun1;                          // 품명 ?
+                        label6.Text = _CARNO;                           // 차량번호
+                        label7.Text = _selectedEMP_NM;                          // 검수자
+                        label8.Text = fullWeight;                               // 총중량
+                        label9.Text = emptyWeight;                              // 공차중량
+                        label10.Text = string.Format("{0}KG", netWeight.ToString());                    // 실중량
+                        label11.Text = _selectedGubun1;                         // 등급명
+                        label12.Text = string.Format("{0}KG", chaGam.ToString());                       // 감량
+                        label13.Text = _selectedJ_State;                        // 감량사유
+
+                        //#003 이전위치
+
+                        SelectTabPage(5);
+                        //화면이 깨지는거 처럼 이상해서 없앰 2022-06-24 정은영
+                        //SelectTabPage(4);
+
+                        // - jpg 저장 
+                        Bitmap bmp = new Bitmap(this.panelTicket.Width, this.panelTicket.Height);
+                        this.panelTicket.DrawToBitmap(bmp, new Rectangle(0, 0, this.panelTicket.Width, this.panelTicket.Height));
+                        string ticketImageFile = string.Concat(appPath, @"\ticket\", DateTime.Now.ToString("yyyyMMdd_HHmmss_"), _selectedJunpyoID, ".jpg");
+                        bmp.Save(ticketImageFile, System.Drawing.Imaging.ImageFormat.Jpeg);
+                        Thread.Sleep(300);
+                        // - WebFax 발송
+                        WebFax fax = new WebFax(_faxServiceIsTest);
+                        string faxResultNumber = string.Empty;
+                        bool bRet = fax.SendFax
+                        (
+                            _faxNumber,                                 // 발신번호
+                            _selectedFax,                               // 수신번호
+                            _selectedDealerNm,                          // 수신자명
+                            ticketImageFile,                            // 파일명
+                            "WeighingTicket",                           // 팩스제목
+                            out faxResultNumber                         // out result : 접수번호
+                        );
+
+                        Log.AddLog(string.Concat("팩스발송 - 발신번호 : ", _faxNumber, ", 수신번호 : ", _selectedFax, ", 수신자명 : ", _selectedDealerNm, ", 파일명 : ", ticketImageFile));
+
+
+                        // #002
+
+                        if (bRet)
+                        {
+                            Log.AddLog(string.Concat("팩스 접수번호 : ", faxResultNumber));
+
+                            StringBuilder strSql = new StringBuilder();
+
+                            strSql.Clear();
+                            strSql.AppendFormat(" ");
+                            strSql.AppendFormat(" INSERT INTO WEB_FAX_LOG ");
+                            strSql.AppendFormat("           ( JUNPYOID ");
+                            strSql.AppendFormat("           , WEB_FAX_NO ");
+                            strSql.AppendFormat("           , FAX_SND_NO ");
+                            strSql.AppendFormat("           , PGM_ID ");
+                            strSql.AppendFormat("           , REG_ID ");
+                            strSql.AppendFormat("           , REG_DT ) ");
+                            strSql.AppendFormat("     VALUES( {0} ", _selectedJunpyoID);
+                            strSql.AppendFormat("           , '{0}' ", faxResultNumber);
+                            strSql.AppendFormat("           , '{0}' ", _selectedFax);
+                            strSql.AppendFormat("           , 'SYS999F01' "); //HARDCODING
+                            strSql.AppendFormat("           , '9999' "); //HARDCODING
+                            strSql.AppendFormat("           , CONVERT(VARCHAR(19),GETDATE(),20) ) ");
+
+                            nRet = ExecuteNonQuery(strSql.ToString(), out error);
+                        }
+                        else
+                        {
+                            MessageBox.Show(new Form { TopMost = true }, faxResultNumber);
+                        }
+
+                        if (nRet == 1)
+                        {
+
+                        }
+                        else
+                        {
+                            if (!string.IsNullOrEmpty(error))
+                            {
+                                Log.AddLog(error);
+                                MessageBox.Show(new Form { TopMost = true }, error);
+                            }
+                        }
+                    }
+                    */
+                }
+                #endregion
+                using (MessageForm form = new MessageForm())
+                {
+                    form.FormTitle = "계근등록";
+                    form.Message_1 = "처리되었습니다.";
+                    form.Message_2 = "- 초기 페이지로 이동합니다.";
+                    form.ShowDialog();
+                }
+            }
+            catch (Exception ex)
+            {
+                SelectTabPage(0);
+                Log.AddLog(ex.Message);
+                MessageBox.Show(new Form { TopMost = true }, ex.Message);
+            }
+            finally
+            {
+                _SLINO = string.Empty;
+
+                // 완료 후 인디케이터 데이터를 처리하지 않음
+                _useWeighing = false;
+                InitWeighingValue();
+
+                SetInitVehicleNumber(true);
+                //InitVehicleNumber();
+                SetCompleteButton2(true);
+                SetCompleteButtonVisible(false);
+                SetPrvButton2(true);
+                SetNextButtonVisible(false);
+
+                // 전표(계량증명서) 바인딩 값 초기화
+                InitTicketImage();
+                SelectTabPage(0);
+
+                //#001 소리재생 제거 2022-12-08
+                //Thread alarmThread = new Thread(new ThreadStart(compleAlarm));
+            }
+        }
+
+        #region 소리재생  #001
+        private void compleAlarm()
+        {
+            playMusic();
+            Thread.Sleep(10000);
+            stopMusic();
+        }
+
+        private string musicPath = Application.StartupPath + @"\music\classical-waltz-loop.wav";
+        private void playMusic()
+        {
+            SoundPlayer sp = new SoundPlayer(musicPath);
+            sp.Play();
+        }
+
+        private void stopMusic()
+        {
+            SoundPlayer sp = new SoundPlayer(musicPath);
+            sp.Stop();
+        }
+        #endregion
+
+        // 2차 계근 저장 시, 중량 자동계산 메서드
+        private void AUTO_WEIGHT_CALCULATE()
+        {
+            // 1-0. 1차, 2차 계근중량이 모두 측정되었을 때만 계산
+            if (_FWEIT != 0 && _weight != 0)
+            {
+                // 1-1. 공차중량 = 1차, 2차 중량 중 낮은 중량값
+                _EWEIT = (_FWEIT > _weight ? _weight : _FWEIT);
+
+                // 1-2. 실중량 = 1차 - 2차의 절댓값
+                _RWEIT = Math.Abs(_FWEIT - _weight);
+
+                // 1-3. 인수량 = 실중량 - 감량의 절댓값
+                _AWEIT = Math.Abs(_RWEIT - _LWEIT);
+            }
+            else
+            {
+                _EWEIT = 0;
+                _RWEIT = 0;
+                _AWEIT = 0;
+            }
+        }
+
+        int _time = 0;
+        bool _isTimer = false;
+        // Yolo 프로그램과 소켓통신하여 계근 적합/부적합 판정
+        private bool YoloTransfer()
+        {
+            Thread tr = new Thread(new ThreadStart(WaitFormTimer));
+            tr.IsBackground = true;
+            tr.Start();
+            _time = 30;
+
+            Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            bool result = false;
+
+            try
+            {
+                // Yolo 분석 프로그램 IP 및 포트 (현재 : 로컬, 로컬로 소켓 열리는 지 확인필요)
+                var endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 5959);
+                // 소켓 연결
+                sock.Connect(endPoint);
+
+                // 소켓이 연결되었다면
+                if (sock.Connected)
+                {
+                    // 버퍼크기 : 8KB 
+                    byte[] sendBuffer = new byte[8192];
+                    byte[] receiveBuffer = new byte[8192];
+
+                    if (sendBuffer != null)
+                    {
+                        // 시작 메시지 보내기
+                        string command = "start";
+                        byte[] buff = Encoding.UTF8.GetBytes(command);
+                        sock.Send(buff, SocketFlags.None);
+
+                        _isTimer = true;
+                        // 서버로부터 데이터 수신 대기 (수신전까지 이후 코드 수행하지 않음)
+                        int temp = sock.Receive(receiveBuffer);
+                        // 수신 데이터 String 변환
+                        string YoloResult = Encoding.UTF8.GetString(receiveBuffer, 0, temp);
+                        _isTimer = false;
+
+                        if (YoloResult.Equals("1"))
+                        {
+                            // 적합
+                            result = true;
+                        }
+                        else if (YoloResult.Equals("0"))
+                        {
+                            // 부적합 메시지
+                            using (MessageForm form = new MessageForm())
+                            {
+                                form.FormTitle = "계근등록";
+                                form.Message_1 = "계근차량 위치 부적합";
+                                form.Message_2 = "- 차량이동 후 재시도 바랍니다.";
+                                form.ShowDialog();
+                            }
+                            buttonTab5Next.Visible = true;
+                        }
+                        else
+                        {
+                            // Yolo 프로그램 내부 이슈 메시지 (RTSP 연결실패 등)
+                            using (MessageForm form = new MessageForm())
+                            {
+                                form.FormTitle = "계근등록";
+                                form.Message_1 = "계근차량 위치 분석 실패";
+                                form.Message_2 = "- 관리자에게 문의바랍니다.";
+                                form.ShowDialog();
+                            }
+                            buttonTab5Next.Visible = true;
+                        }
+                    }
+                    return result;
+                }
+                else
+                {
+                    _isTimer = false;
+                    // Yolo 프로그램과 소켓 연결되지 않음 메시지
+                    using (MessageForm form = new MessageForm())
+                    {
+                        form.FormTitle = "계근등록";
+                        form.Message_1 = "위치 분석기 연결 실패";
+                        //form.Message_2 = "- 관리자에게 문의바랍니다.";
+                        form.ShowDialog();
+                    }
+                    buttonTab5Next.Visible = true;
+                    return result;
+                }
+            }
+            catch (SocketException ex)
+            {
+                _isTimer = false;
+                if (sock.Connected)
+                {
+                    sock.Shutdown(SocketShutdown.Both);
+                    sock.Disconnect(true);
+                    sock.Close();
+                    sock.Dispose();
+                }
+                using (MessageForm form = new MessageForm())
+                {
+                    form.FormTitle = "계근등록";
+                    form.Message_1 = "Yolo 분석 실패";
+                    form.Message_2 = "- 분석 프로그램을 실행하세요.";
+                    form.ShowDialog();
+                }
+                buttonTab5Next.Visible = true;
+                return result;
+            }
+            finally
+            {
+                //SplashScreenManager.CloseForm();
+                if (tr != null && tr.IsAlive)
+                    tr.Join();
+                if (sock != null)
+                {
+                    sock.Close();
+                    sock.Dispose();
+                }
+            }
+        }
+
+
+        private void WaitFormTimer()
+        {
+            SplashScreenManager.ShowForm(typeof(WaitForm1));
+            while (_isTimer)
+            {
+                try
+                {
+                    SplashScreenManager.Default.SetWaitFormCaption("Yolo 분석 연결");
+                    SplashScreenManager.Default.SetWaitFormDescription("차량 정위치 분석중 ... " + _time.ToString());
+                    _time -= 1;
+                    if (_time == 0)
+                        _isTimer = false;
+                    Thread.Sleep(1000);
+                }
+                catch (Exception ex)
+                {
+                    _isTimer = false;
+                }
+            }
+            if (!_isTimer) { SplashScreenManager.CloseForm(); }
+        }
+
+        // RTSP 영상 이미지 저장
+        private void RTSP_IMAGE_SAVE(string path, string slino, string GB)
+        {
+            //frame1 = new Mat();
+            //frame2 = new Mat();
+            //frame3 = new Mat();
+            //if (!capture1.Read(frame1)) { }
+            //if (!capture2.Read(frame2)) {  }
+            //if (!capture3.Read(frame3)) { }
+
+            string imageFile = string.Empty;
+
+            // 2-3. 이미지 저장
+            for (int i = 1; i <= 3; i++)
+            {
+                Thread.Sleep(50);
+                /*
+                Bitmap CpBitmap = null;
+                if (i == 1) { CpBitmap = BitmapConverter.ToBitmap(frame1); }
+                else if (i == 2) { CpBitmap = BitmapConverter.ToBitmap(frame2); }
+                else if (i == 3) { CpBitmap = BitmapConverter.ToBitmap(frame3); }
+                imageFile = string.Concat(path, slino, "_", GB, "_", i.ToString(), ".jpg");
+                CpBitmap.Save(imageFile, ImageFormat.Jpeg);
+                //Delay(800);
+                */
+                PictureBox pb = new PictureBox();
+                Image CpBitmap = null;
+                if (i == 1) { CSafeSetImageBox(pb, pictureBox14.Image); CpBitmap = pb.Image; }
+                else if (i == 2) { CSafeSetImageBox(pb, pictureBox13.Image); CpBitmap = pb.Image; }
+                else if (i == 3) { CSafeSetImageBox(pb, pictureBox12.Image); CpBitmap = pb.Image; }
+                if (CpBitmap == null)
+                {
+                    CpBitmap = Properties.Resources.No_Img;
+                }
+                imageFile = string.Concat(path, slino, "_", GB, "_", i.ToString(), ".jpg");
+                CpBitmap.Save(imageFile, ImageFormat.Jpeg);
+                CpBitmap.Dispose();
+            }
+
+            // 1차 계근이라면, 2차 계근 이미지는 No Img 파일로 업로드
+            if (GB.Equals("1"))
+            {
+                for (int i = 1; i <= 3; i++)
+                {
+                    Image CpBitmap = Properties.Resources.No_Img;
+                    imageFile = string.Concat(path, slino, "_2_", i.ToString(), ".jpg");
+                    CpBitmap.Save(imageFile, ImageFormat.Jpeg);
+                }
+            }
+
+            // 2-4. CCTV 영상 메모리 해제 (중요★, 한번 끊었다가 스레드 재수행)
+            isConnected = false;
+
+            //capture1.Release();
+            //capture2.Release();
+            //capture3.Release();
+
+            //capture1.Dispose();
+            //capture2.Dispose();
+            //capture3.Dispose();
+
+            //t_Camera1?.Abort();
+            //t_Camera1 = null;
+
+            //t_Camera2?.Abort();
+            //t_Camera2 = null;
+
+            //t_Camera3?.Abort();
+            //t_Camera3 = null;
+
+            //영상쓰레드 재시작
+            //StartAll();
+        }
+
+        // 저장된 이미지 파일 복사
+        private void RTSP_IMAGE_COPY(string path, string slino, string jdate, string GB, string[] file)
+        {
+            string destFile = string.Empty;
+            DateTime createdTime = Convert.ToDateTime(jdate);
+            if (_saveImage)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    string filepath = file[i];
+                    destFile = string.Concat(path, slino.ToString(), "_", GB, "_", (i + 1).ToString(), ".jpg");
+                    if (File.Exists(filepath))
+                    {
+                        File.Copy(filepath, destFile);
+                        File.SetCreationTime(destFile, createdTime);
+                    }
+                }
+            }
+        }
+
+        // FTP 파일 업로드
+        private void FTP_FILE_UPLOAD(string[] file)
+        {
+            try
+            {
+                foreach (string filepath in file)
+                {
+                    string tempname = filepath.Substring(filepath.LastIndexOf('\\'));
+                    string filename = tempname.Replace("\\", "");
+
+                    Image image = Image.FromFile(filepath);
+                    byte[] temp = ImageToByteArray(image);
+
+                    if (temp != null)
+                    {
+                        var ftpUpfile = new WebClient();
+                        ftpUpfile.Credentials = new NetworkCredential(_ftpUser, _ftpPassword);
+                        ftpUpfile.UploadFile(string.Concat("ftp://" + _ftpAddress + "/" + _ftpUploadPath + "/" + filename), filepath);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(new Form { TopMost = true }, ex.Message);
+                return;
+            }
+        }
+
+        // FTP 파일 업로드 (날짜포함)
+        private void FTP_FILE_UPLOAD(string[] file, string tdate)
+        {
+            try
+            {
+                string[] strArr = tdate.Split('-');
+                //string ftpPath = @"ftp://" + _ftpAddress + "/" + _ftpUploadPath + "/" + strArr[0] + "/" + strArr[1] + "/" + tdate;
+                string ftpPath = @"ftp://" + _ftpAddress + "/" + _ftpUploadPath + "/Images/" + strArr[0] + "/" + strArr[1] + "/" + tdate;
+                // 누락된 디렉토리 경로는 체크 후 자동 생성
+                FTPDirectioryCheck(ftpPath, _ftpUser, _ftpPassword);
+                foreach (string filepath in file)
+                {
+                    string tempname = filepath.Substring(filepath.LastIndexOf('\\'));
+                    string filename = tempname.Replace("\\", "");
+
+                    Image image = Image.FromFile(filepath);
+                    byte[] temp = ImageToByteArray(image);
+
+                    if (temp != null)
+                    {
+                        var ftpUpfile = new WebClient();
+                        ftpUpfile.Credentials = new NetworkCredential(_ftpUser, _ftpPassword);
+                        ftpUpfile.UploadFile(string.Concat(ftpPath, "/", filename), filepath);
+                    }
+                    image.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show(new Form { TopMost = true }, ex.Message);
+                return;
+            }
+        }
+
+        // 1차, 2차 계근 이미지 출력물에 바인딩
+        private void BINDING_IMAGE(string image, PictureBox pb)
+        {
+            if (File.Exists(image))
+            {
+                StreamReader sr = new StreamReader(image);
+                pb.BackgroundImage = Image.FromStream(sr.BaseStream);
+                sr.Dispose();
+            }
+            //2020-12-08 계근이미지가 존재하지 않을 경우 이미지 없음으로 출력
+            else
+                pb.BackgroundImage = Properties.Resources.No_Img;
+        }
+
+        private void buttonTab5Prev_Click(object sender, EventArgs e)
+        {
+            // 이전단계로..
+            Log.AddLog("이전단계이동");
+
+            _confirm = ConfirmYN.NonConfirm;
+            _state = WeighingState.None;
+            _useWeighing = false;
+            is_AutoComplete = false;
+
+            if (_weighingStep == WeighingStep.First)
+            {
+                _CVCOD = string.Empty;
+                _CVNAM = string.Empty;
+                _FAXNO = string.Empty;
+                _FAXYN = string.Empty;
+
+                SelectTabPage(3);       // 거래처 입력
+                buttonTab4Next.Visible = false;
+                buttonTab5Next.Visible = false;
+                textBoxCustomer.Focus();
+            }
+
+            if (_weighingStep == WeighingStep.Second)
+            {
+                // 이전단계로 넘어가도 차량정보는 그대로 둔다..
+                // InitVehicleNumber();
+                SelectTabPage(2);       // 차량번호 입력
+            }
+        }
+
+        // 무인계근 저장 테스트 활성화
+        private void IndicatorTestEnabled()
+        {
+            buttonTab5Complete.Visible = true;
+            buttonTab5Complete.Enabled = true;
+            SetCompleteButton2(true);
+            SetPrvButton2(true);
+            if (_weighingStep == WeighingStep.First)
+            { indicator.Weight = 12490; _weight = 12490; }
+            else if (_weighingStep == WeighingStep.Second)
+            { indicator.Weight = 65530; _weight = 65530; }
+        }
+        #endregion
+
+        #endregion
+
+        #region[인디게이터]
+        void OnIndicatorTimer(object state)
+        {
+            _indicatorTimer.Change(System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+
+            // 2초이상 수신없을 시 연결해제 알람
+            TimeSpan sp = DateTime.Now - _indicatorReceiveTime;
+            _indicatorConnected = sp.TotalSeconds >= 2 ? false : true;
+
+            if (_indicatorPrevConnected != _indicatorConnected)
+            {
+                Log.AddLog(string.Concat("인디케이터 연결상태 변경 : ", _indicatorPrevConnected.ToString(), " -> ", _indicatorConnected.ToString()));
+
+                indicator.Connect = _indicatorConnected;
+            }
+
+            _indicatorPrevConnected = _indicatorConnected;
+
+            if (!_shutdown)
+                _indicatorTimer.Change(1000, System.Threading.Timeout.Infinite);
+        }
+
+        private void _indicator_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            // 데이터 수신 (데이터 포멧 확인 할 것)
+            // - 기본 Data Format : AD4329A 18byte Format
+            // - 'H1,H2,Data(8) Kg  '
+            //                    Cr
+            //                    Lf
+            // - '123456789012345678'
+            // - 'ST,GS,+00000.0kg  '   <- ex
+
+            // H1 : OL - Over Load
+            //      ST - 표시기 안정
+            //      US - 표시기 비 안정
+            // H2 : NT - Net-Weight (NET)
+            //      GS - 실 중량 (GROSS)
+            string readData = string.Empty;
+
+            lock (_lockObject)
+            {
+                try
+                {
+                    if (!_shutdown)
+                    {
+                        readData = _indicator.ReadLine();
+
+                        _indicatorReceiveTime = DateTime.Now;
+
+                        if (_writeIndicatorData)
+                            Log.AddLog(string.Concat("Indicator data - ", readData));
+
+                        if (readData.Length == 17)
+                        {
+                            // 계량상태에서만 인디케이터 데이터 처리
+                            if (_useWeighing)
+                            {
+                                // 'US,GS,+12345.0kg' - 비안정
+                                // 'ST,GS,+12345.0kg' - 안정
+
+                                // 실데이터 
+                                // S??GS?+0000000???
+                                //TxtBuffer.Text = readData;
+                                string state = readData.Substring(0, 2);
+                                string kg = readData.Substring(14, 2).ToLower();
+                                int weight = 0;
+
+                                if (int.TryParse(readData.Substring(7, 7), out weight) && kg == "kg")
+                                {
+                                    // 계량중량표시..
+                                    indicator.Weight = weight;
+
+                                    //ERP 요청값 처리를 위하여 추가세팅
+                                    Indicator_Thread.Weight = weight;
+                                    //_iWeight = weight;//소나무 정보기술 로직 추가 하단 코드 참조
+
+                                    // 계량시작 인식중량보다 크면 계량시작!!
+                                    if (weight > _startWeight)
+                                    {
+                                        if (!_weightFlag)
+                                        {
+                                            // 계량이 시작됨
+                                            _weightFlag = true;
+
+                                            Log.AddLog("계량상태 변경 : Standby -> Start");
+                                            _state = WeighingState.Start;
+                                            SetCompleteButton(false);
+                                            // 계량관련 데이터 초기화
+                                            _weight = 0;
+                                            _stableCount = 0;
+                                        }
+
+                                        if (state == "ST")
+                                            _stableCount++;           // 인디케이터 값이 안정적임
+
+                                        if (state == "US")
+                                        {
+                                            _stableCount = 0;
+
+                                            if (_state == WeighingState.Stable)
+                                            {
+                                                Log.AddLog("계량상태 변경 : Stable -> Start");
+
+                                                _state = WeighingState.Start;
+                                                SetCompleteButton(false);
+                                            }
+
+                                            indicator.Stable = false;
+                                        }
+
+                                        if (_stableCount >= _stableWeightCount)
+                                        {
+                                            // 계량 중량 확정    
+                                            _weight = weight;
+
+                                            if (_state == WeighingState.Start)
+                                            {
+                                                Log.AddLog("계량상태 변경 : Start -> Stable");
+
+                                                _state = WeighingState.Stable;
+
+                                                indicator.Stable = true;
+
+                                                SetCompleteButton(true);
+
+                                                /*
+                                                 * 2020-12-08 
+                                                 * 중량확정 시 5초간 아무런 액션이 없을 시 자동으로 완료처리되도록 로직추가
+                                                 */
+
+                                                is_AutoComplete = true;
+
+                                                //if (_T_CONFIRM != null)
+                                                //{
+                                                //    if (!_T_CONFIRM.IsAlive)
+                                                //    {
+                                                //        is_AutoComplete = true;
+                                                //        _T_CONFIRM = new Thread(AutoComplete);
+                                                //        _T_CONFIRM.IsBackground = true;
+                                                //        _T_CONFIRM.Start();
+                                                //    }
+                                                //}
+                                                //else
+                                                //{
+                                                //    is_AutoComplete = true;
+                                                //    _T_CONFIRM = new Thread(AutoComplete);
+                                                //    _T_CONFIRM.IsBackground = true;
+                                                //    _T_CONFIRM.Start();
+                                                //}
+                                            }
+                                        }
+                                        else
+                                        {
+                                            is_AutoComplete = false;
+                                            //if (_T_CONFIRM.IsAlive)
+                                            //{
+                                            //    _T_CONFIRM.Abort();
+                                            //}
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // 계량상태가 아님..
+                                        _weightFlag = false;
+
+                                        if (_state != WeighingState.Standby)
+                                        {
+                                            Log.AddLog(string.Concat("계량상태 변경 : ", _state.ToString(), " -> Standby"));
+
+                                            indicator.Stable = false;
+                                            _state = WeighingState.Standby;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    Log.AddLog(string.Concat("Indicator 데이터 오류 - ", readData));
+                                }
+                            }
+                            /*
+                             * 2020-12-07 
+                             * 계근값 전송을 위하여 지속적으로 변수에 값 세팅
+                             */
+                            else
+                            {
+                                //TxtBuffer.Text = readData;
+
+                                string kg = readData.Substring(14, 2).ToLower();
+                                int weight = 0;
+                                if (int.TryParse(readData.Substring(7, 7), out weight) && kg == "kg")
+                                {
+                                    Indicator_Thread.Weight = weight;
+                                    //_iWeight = _weight;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Log.AddLog(string.Concat("Indicator 수신데이터 길이(", readData.Length.ToString(), ") 오류 - ", readData));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.AddLog(ex.Message);
+                }
+            }
+        }
+
+        private void _indicator_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+        {
+            Log.AddLog(string.Concat("_indicator_ErrorReceived : ", e.EventType.ToString(), " - ", e.ToString()));
+        }
+
+        private void ReadData(string readData)
+        {
+            lock (_lockObject)
+            {
+                try
+                {
+                    if (!_shutdown)
+                    {
+                        _indicatorReceiveTime = DateTime.Now;
+
+                        if (_writeIndicatorData)
+                            Log.AddLog(string.Concat("Indicator data - ", readData));
+
+                        if (readData.Length == 16)
+                        {
+                            // 계량상태에서만 인디케이터 데이터 처리
+                            if (_useWeighing)
+                            {
+                                // 'US,GS,+12345.0kg' - 비안정
+                                // 'ST,GS,+12345.0kg' - 안정
+
+                                string state = readData.Substring(0, 2);
+                                string kg = readData.Substring(14, 2).ToLower();
+                                int weight = 0;
+
+                                if (int.TryParse(readData.Substring(7, 7), out weight) && kg == "kg")
+                                {
+                                    // 계량중량표시..
+                                    indicator.Weight = weight;
+
+                                    //ERP 요청값 처리를 위하여 추가세팅
+                                    Indicator_Thread.Weight = weight;
+                                    //_iWeight = weight;//소나무 정보기술 로직 추가 하단 코드 참조
+
+                                    // 계량시작 인식중량보다 크면 계량시작!!
+                                    if (weight > _startWeight)
+                                    {
+                                        if (!_weightFlag)
+                                        {
+                                            // 계량이 시작됨
+                                            _weightFlag = true;
+
+                                            Log.AddLog("계량상태 변경 : Standby -> Start");
+                                            _state = WeighingState.Start;
+                                            SetCompleteButton(false);
+                                            // 계량관련 데이터 초기화
+                                            _weight = 0;
+                                            _stableCount = 0;
+                                        }
+
+                                        if (state == "ST")
+                                            _stableCount++;           // 인디케이터 값이 안정적임
+
+                                        if (state == "US")
+                                        {
+                                            _stableCount = 0;
+
+                                            if (_state == WeighingState.Stable)
+                                            {
+                                                Log.AddLog("계량상태 변경 : Stable -> Start");
+
+                                                _state = WeighingState.Start;
+                                                SetCompleteButton(false);
+                                            }
+
+                                            indicator.Stable = false;
+                                        }
+
+                                        if (_stableCount >= _stableWeightCount)
+                                        {
+                                            // 계량 중량 확정    
+                                            _weight = weight;
+
+                                            if (_state == WeighingState.Start)
+                                            {
+                                                Log.AddLog("계량상태 변경 : Start -> Stable");
+
+                                                _state = WeighingState.Stable;
+
+                                                indicator.Stable = true;
+
+                                                SetCompleteButton(true);
+
+                                                /*
+                                                 * 2020-12-08 
+                                                 * 중량확정 시 5초간 아무런 액션이 없을 시 자동으로 완료처리되도록 로직추가
+                                                 */
+
+                                                is_AutoComplete = true;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            is_AutoComplete = false;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // 계량상태가 아님..
+                                        _weightFlag = false;
+
+                                        if (_state != WeighingState.Standby)
+                                        {
+                                            Log.AddLog(string.Concat("계량상태 변경 : ", _state.ToString(), " -> Standby"));
+
+                                            indicator.Stable = false;
+                                            _state = WeighingState.Standby;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    Log.AddLog(string.Concat("Indicator 데이터 오류 - ", readData));
+                                }
+                            }
+                            /*
+                             * 2020-12-07 
+                             * 계근값 전송을 위하여 지속적으로 변수에 값 세팅
+                             */
+                            else
+                            {
+                                string kg = readData.Substring(14, 2).ToLower();
+                                int weight = 0;
+                                if (int.TryParse(readData.Substring(7, 7), out weight) && kg == "kg")
+                                {
+                                    Indicator_Thread.Weight = weight;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Log.AddLog(string.Concat("Indicator 수신데이터 길이(", readData.Length.ToString(), ") 오류 - ", readData));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.AddLog(ex.Message);
+                }
+            }
+        }
+        #endregion
+
+        #region[프린터]
+        private void printDocument_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            //display = string.Format("{0,6:N0}{1}{2}", _weight, _space ? " " : "", _unit);
+
+            using (Font font = new Font("굴림", 11))
+            {
+                using (SolidBrush drawBrush = new SolidBrush(Color.Black))
+                {
+                    string fullWeight = string.Concat(string.Format("{0,6:N0} KG", _SWEIT).PadRight(15), _STIME.Substring(11, 5).Replace('-', '/'));
+                    string emptyWeight = string.Concat(string.Format("{0,6:N0} KG", _EWEIT).PadRight(15), _FTIME.Substring(11, 5).Replace('-', '/'));
+                    int netWeight = _AWEIT;
+
+                    g.DrawString(_CVNAM, font, drawBrush, new PointF(_X + 130.0F, _Y + 3.0F));                       // 거래처명
+                    g.DrawString(_TDATE.Replace('-', '/'), font, drawBrush, new PointF(_X + 128.0F, _Y + 33.0F));                        // 일자
+                    if (_weighingType == WeighingType.In)                                                                       // 입출고
+                        g.DrawString("입고", font, drawBrush, new PointF(_X + 315.0F, _Y + 33.0F));
+                    if (_weighingType == WeighingType.Out)
+                        g.DrawString("출고", font, drawBrush, new PointF(_X + 315.0F, _Y + 33.0F));
+                    g.DrawString(_SEQNO, font, drawBrush, new PointF(_X + 150.0F, _Y + 62.0F));                           // 계근번호
+                    g.DrawString(_ITCOD, font, drawBrush, new PointF(_X + 305.0F, _Y + 62.0F));                        // 품명 ?
+                    g.DrawString(_CARNO, font, drawBrush, new PointF(_X + 143.0F, _Y + 92.0F));                         // 차량번호
+                    g.DrawString(_PLNNM, font, drawBrush, new PointF(_X + 300.0F, _Y + 89.0F));                        // 검수자
+                    g.DrawString(fullWeight, font, drawBrush, new PointF(_X + 140.0F, _Y + 118.0F));                            // 총중량
+                    g.DrawString(emptyWeight.ToString(), font, drawBrush, new PointF(_X + 140.0F, _Y + 147.0F));                // 공차중량
+
+                    // 2020.03.25
+                    // - 실중량은 폰트 크게..
+                    using (Font bigFont = new Font("굴림", 12, FontStyle.Bold))
+                        g.DrawString(string.Format("{0,6:N0} KG", netWeight), bigFont, drawBrush, new PointF(_X + 140.0F, _Y + 176.0F));
+
+                    g.DrawString(_ITCOD, font, drawBrush, new PointF(_X + 105.0F, _Y + 232.0F));                        // 등급명
+                    g.DrawString(string.Format("{0} KG", _LWEIT.ToString()), font, drawBrush, new PointF(_X + 200.0F, _Y + 232.0F));                                                                      // 감량
+
+                    using (Font smallFont = new Font("굴림", 8, FontStyle.Bold))
+                        g.DrawString(_LOSNM, smallFont, drawBrush, new PointF(_X + 273.0F, _Y + 232.0F));                      // 감가.감량사유
+
+                    // 이미지 출력
+                    Size size = new Size(160, 110);
+                    string basePath = string.Concat(Application.StartupPath, @"\image\print\");
+                    string printFile = string.Empty;
+
+                    Bitmap NoImage = Properties.Resources.No_Img;
+
+                    // - 1_1.jpg
+                    printFile = string.Concat(basePath, "1_1.jpg");
+                    if (File.Exists(printFile))
+                    {
+                        Bitmap bmp_1_1 = new Bitmap(new Bitmap(printFile), size);
+                        g.DrawImage(bmp_1_1, new PointF(_X + 50.0F, _Y + 282.0F));
+                    }
+                    else
+                    {
+                        g.DrawImage(NoImage, new PointF(_X + 50.0F, _Y + 282.0F));
+                    }
+                    // - 1_2.jpg
+                    printFile = string.Concat(basePath, "1_2.jpg");
+                    if (File.Exists(printFile))
+                    {
+                        Bitmap bmp_1_2 = new Bitmap(new Bitmap(printFile), size);
+                        g.DrawImage(bmp_1_2, new PointF(_X + 50.0F, _Y + 399.0F));
+                    }
+                    else
+                    {
+                        g.DrawImage(NoImage, new PointF(_X + 50.0F, _Y + 399.0F));
+                    }
+                    // - 1_3.jpg
+                    printFile = string.Concat(basePath, "1_3.jpg");
+                    if (File.Exists(printFile))
+                    {
+                        Bitmap bmp_1_3 = new Bitmap(new Bitmap(printFile), size);
+                        g.DrawImage(bmp_1_3, new PointF(_X + 50.0F, _Y + 516.0F));
+                    }
+                    else
+                    {
+                        g.DrawImage(NoImage, new PointF(_X + 50.0F, _Y + 516.0F));
+                    }
+                    // - 2_1.jpg
+                    printFile = string.Concat(basePath, "2_1.jpg");
+                    if (File.Exists(printFile))
+                    {
+                        Bitmap bmp_2_1 = new Bitmap(new Bitmap(printFile), size);
+                        g.DrawImage(bmp_2_1, new PointF(_X + 224.0F, _Y + 283.0F));
+                    }
+                    else
+                    {
+                        g.DrawImage(NoImage, new PointF(_X + 224.0F, _Y + 283.0F));
+                    }
+                    // - 2_2.jpg
+                    printFile = string.Concat(basePath, "2_2.jpg");
+                    if (File.Exists(printFile))
+                    {
+                        Bitmap bmp_2_2 = new Bitmap(new Bitmap(printFile), size);
+                        g.DrawImage(bmp_2_2, new PointF(_X + 224.0F, _Y + 400.0F));
+                    }
+                    else
+                    {
+                        g.DrawImage(NoImage, new PointF(_X + 224.0F, _Y + 400.0F));
+                    }
+                    // - 2_3.jpg
+                    printFile = string.Concat(basePath, "2_3.jpg");
+                    if (File.Exists(printFile))
+                    {
+                        Bitmap bmp_2_3 = new Bitmap(new Bitmap(printFile), size);
+                        g.DrawImage(bmp_2_3, new PointF(_X + 224.0F, _Y + 517.0F));
+                    }
+                    else
+                    {
+                        g.DrawImage(NoImage, new PointF(_X + 224.0F, _Y + 517.0F));
+                    }
+                }
+            }
+        }
+
+
+        #endregion
+
+        #region [키보드 클릭]
+        #region[2021-01-14 기준 사용하지 않는 배열]
+        /*
+         * 2021-01-14 현업요청
+         * 현장 운전자들이 거래처 입력 시 레이아웃의 항목들이 많고
+         * 특수문자 같은 배열들은 사용하지 않는다고 하여 문자배열 및 SPACE 등고 같이 필수요소들만 남기고 나머지는 주석처리
+         */
+
+        //"~"
+        private void pictureBoxOem1_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.Oem3, 0, 0, 0);      //키다운
+            keybd_event((byte)Keys.Oem3, 0, 0x02, 0);   //키업
+
+            ShiftClear();
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.D1, 0, 0, 0);   //키다운
+            keybd_event((byte)Keys.D1, 0, 0x02, 0);//키업
+
+            ShiftClear();
+        }
+
+        private void pictureBox2_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.D2, 0, 0, 0);   //키다운
+            keybd_event((byte)Keys.D2, 0, 0x02, 0);//키업
+
+            ShiftClear();
+        }
+
+        private void pictureBox3_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.D3, 0, 0, 0);   //키다운
+            keybd_event((byte)Keys.D3, 0, 0x02, 0);//키업
+
+            ShiftClear();
+        }
+
+        private void pictureBox4_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.D4, 0, 0, 0);
+            keybd_event((byte)Keys.D4, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        private void pictureBox5_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.D5, 0, 0, 0);
+            keybd_event((byte)Keys.D5, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        private void pictureBox6_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.D6, 0, 0, 0);
+            keybd_event((byte)Keys.D6, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        private void pictureBox7_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.D7, 0, 0, 0);
+            keybd_event((byte)Keys.D7, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        private void pictureBox8_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.D8, 0, 0, 0);
+            keybd_event((byte)Keys.D8, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        private void pictureBox9_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.D9, 0, 0, 0);
+            keybd_event((byte)Keys.D9, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        private void pictureBox10_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.D0, 0, 0, 0);
+            keybd_event((byte)Keys.D0, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        //"-"
+        private void pictureBoxOem2_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.OemMinus, 0, 0, 0);
+            keybd_event((byte)Keys.OemMinus, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        //"="
+        private void pictureBoxOem3_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.Oemplus, 0, 0, 0);
+            keybd_event((byte)Keys.Oemplus, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        private void pictureBoxTab_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.Tab, 0, 0, 0);
+            keybd_event((byte)Keys.Tab, 0, 0x02, 0);
+        }
+
+        private void pictureBoxCapsLock_Click(object sender, EventArgs e)
+        {
+            return;
+
+            if (_bVKCapsLock == true)
+                pictureBoxCapsLock.BackgroundImage = Properties.Resources.CapsLock;
+            else
+                pictureBoxCapsLock.BackgroundImage = Properties.Resources.CapsLock_on;
+
+            _bVKCapsLock = !_bVKCapsLock;
+
+            keybd_event((byte)Keys.CapsLock, 0, 0, 0);
+            keybd_event((byte)Keys.CapsLock, 0, 0x02, 0);
+        }
+
+        //"["
+        private void pictureBoxOem4_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.Oem4, 0, 0, 0);
+            keybd_event((byte)Keys.Oem4, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        //"]"
+        private void pictureBoxOem5_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.Oem6, 0, 0, 0);
+            keybd_event((byte)Keys.Oem6, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        //"\"
+        private void pictureBoxOem6_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.Oem5, 0, 0, 0);
+            keybd_event((byte)Keys.Oem5, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        //";"
+        private void pictureBoxOem7_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.OemSemicolon, 0, 0, 0);
+            keybd_event((byte)Keys.OemSemicolon, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        //" ' "
+        private void pictureBoxOem8_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.OemQuotes, 0, 0, 0);
+            keybd_event((byte)Keys.OemQuotes, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        //"<"
+        private void pictureBoxOem9_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.Oemcomma, 0, 0, 0);
+            keybd_event((byte)Keys.Oemcomma, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        //">"
+        private void pictureBoxOem10_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.OemPeriod, 0, 0, 0);
+            keybd_event((byte)Keys.OemPeriod, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        //"?"
+        private void pictureBox11_Click(object sender, EventArgs e)
+        {
+            return;
+
+            keybd_event((byte)Keys.OemQuestion, 0, 0, 0);
+            keybd_event((byte)Keys.OemQuestion, 0, 0x02, 0);
+
+            ShiftClear();
+        }
+
+        #endregion[2021-01-14 기준 사용하지 않는 배열]
+
+        private void pictureBoxBackspace_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            keybd_event((byte)Keys.Back, 0, 0, 0);
+            keybd_event((byte)Keys.Back, 0, 0x02, 0);
+        }
+
+        private void pictureBoxQ_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.F, 0, 0, 0);
+                keybd_event((byte)Keys.F, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.Q, 0, 0, 0);
+                keybd_event((byte)Keys.Q, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"ㅃ"
+        private void pictureBoxQ_1_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (!_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.LShiftKey, 0, 0, 0);
+                keybd_event((byte)Keys.Q, 0, 0, 0);
+                keybd_event((byte)Keys.Q, 0, 0x02, 0);
+                keybd_event((byte)Keys.LShiftKey, 0, 0x02, 0);
+            }
+            ShiftClear();
+        }
+
+        //"I", "ㅈ"
+        private void pictureBoxW_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.I, 0, 0, 0);
+                keybd_event((byte)Keys.I, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.W, 0, 0, 0);
+                keybd_event((byte)Keys.W, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"ㅉ"
+        private void pictureBoxW_1_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (!_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.LShiftKey, 0, 0, 0);
+                keybd_event((byte)Keys.W, 0, 0, 0);
+                keybd_event((byte)Keys.W, 0, 0x02, 0);
+                keybd_event((byte)Keys.LShiftKey, 0, 0x02, 0);
+            }
+            ShiftClear();
+        }
+
+        //"C", "ㄷ"
+        private void pictureBoxE_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.C, 0, 0, 0);
+                keybd_event((byte)Keys.C, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.E, 0, 0, 0);
+                keybd_event((byte)Keys.E, 0, 0x02, 0);
+            }
+
+
+            ShiftClear();
+        }
+
+        //"ㄸ"
+        private void pictureBoxE_1_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (!_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.LShiftKey, 0, 0, 0);
+                keybd_event((byte)Keys.E, 0, 0, 0);
+                keybd_event((byte)Keys.E, 0, 0x02, 0);
+                keybd_event((byte)Keys.LShiftKey, 0, 0x02, 0);
+            }
+            ShiftClear();
+        }
+
+        //"A", "ㄱ"
+        private void pictureBoxR_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.A, 0, 0, 0);
+                keybd_event((byte)Keys.A, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.R, 0, 0, 0);
+                keybd_event((byte)Keys.R, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"ㄲ"
+        private void pictureBoxR_1_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (!_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.LShiftKey, 0, 0, 0);
+                keybd_event((byte)Keys.R, 0, 0, 0);
+                keybd_event((byte)Keys.R, 0, 0x02, 0);
+                keybd_event((byte)Keys.LShiftKey, 0, 0x02, 0);
+            }
+            ShiftClear();
+        }
+
+        //"G", "ㅅ"
+        private void pictureBoxT_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.G, 0, 0, 0);
+                keybd_event((byte)Keys.G, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.T, 0, 0, 0);
+                keybd_event((byte)Keys.T, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"ㅆ"
+        private void pictureBoxT_1_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (!_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.LShiftKey, 0, 0, 0);
+                keybd_event((byte)Keys.T, 0, 0, 0);
+                keybd_event((byte)Keys.T, 0, 0x02, 0);
+                keybd_event((byte)Keys.LShiftKey, 0, 0x02, 0);
+            }
+            ShiftClear();
+        }
+
+        //"T", "ㅛ"
+        private void pictureBoxY_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.T, 0, 0, 0);
+                keybd_event((byte)Keys.T, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.Y, 0, 0, 0);
+                keybd_event((byte)Keys.Y, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"R", "ㅕ"
+        private void pictureBoxU_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.R, 0, 0, 0);
+                keybd_event((byte)Keys.R, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.U, 0, 0, 0);
+                keybd_event((byte)Keys.U, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"P", "ㅑ"
+        private void pictureBoxI_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.P, 0, 0, 0);
+                keybd_event((byte)Keys.P, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.I, 0, 0, 0);
+                keybd_event((byte)Keys.I, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"ㅐ"
+        private void pictureBoxO_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (!_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.O, 0, 0, 0);
+                keybd_event((byte)Keys.O, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"ㅒ"
+        private void pictureBoxO_1_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (!_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.LShiftKey, 0, 0, 0);
+                keybd_event((byte)Keys.O, 0, 0, 0);
+                keybd_event((byte)Keys.O, 0, 0x02, 0);
+                keybd_event((byte)Keys.LShiftKey, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"Y", "ㅔ"
+        private void pictureBoxP_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.Y, 0, 0, 0);
+                keybd_event((byte)Keys.Y, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.P, 0, 0, 0);
+                keybd_event((byte)Keys.P, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"Z", "ㅖ"
+        private void pictureBoxP_1_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.Z, 0, 0, 0);
+                keybd_event((byte)Keys.Z, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.LShiftKey, 0, 0, 0);
+                keybd_event((byte)Keys.P, 0, 0, 0);
+                keybd_event((byte)Keys.P, 0, 0x02, 0);
+                keybd_event((byte)Keys.LShiftKey, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"E", "ㅁ"
+        private void pictureBoxA_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.E, 0, 0, 0);
+                keybd_event((byte)Keys.E, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.A, 0, 0, 0);
+                keybd_event((byte)Keys.A, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"B" , "ㄴ"
+        private void pictureBoxS_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.B, 0, 0, 0);
+                keybd_event((byte)Keys.B, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.S, 0, 0, 0);
+                keybd_event((byte)Keys.S, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"H", "ㅇ"
+        private void pictureBoxD_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.H, 0, 0, 0);
+                keybd_event((byte)Keys.H, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.D, 0, 0, 0);
+                keybd_event((byte)Keys.D, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"D", "ㄹ"
+        private void pictureBoxF_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.D, 0, 0, 0);
+                keybd_event((byte)Keys.D, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.F, 0, 0, 0);
+                keybd_event((byte)Keys.F, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"N", "ㅎ"
+        private void pictureBoxG_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.N, 0, 0, 0);
+                keybd_event((byte)Keys.N, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.G, 0, 0, 0);
+                keybd_event((byte)Keys.G, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"S", "ㅗ"
+        private void pictureBoxH_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.S, 0, 0, 0);
+                keybd_event((byte)Keys.S, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.H, 0, 0, 0);
+                keybd_event((byte)Keys.H, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"Q", "ㅓ"
+        private void pictureBoxJ_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.Q, 0, 0, 0);
+                keybd_event((byte)Keys.Q, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.J, 0, 0, 0);
+                keybd_event((byte)Keys.J, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"O", "ㅏ"
+        private void pictureBoxK_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.O, 0, 0, 0);
+                keybd_event((byte)Keys.O, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.K, 0, 0, 0);
+                keybd_event((byte)Keys.K, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"X", "ㅣ"
+        private void pictureBoxL_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.X, 0, 0, 0);
+                keybd_event((byte)Keys.X, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.L, 0, 0, 0);
+                keybd_event((byte)Keys.L, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        private void pictureBoxEnter_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            keybd_event((byte)Keys.Enter, 0, 0, 0);
+            keybd_event((byte)Keys.Enter, 0, 0x02, 0);
+        }
+
+        private void pictureBoxShiftL_Click(object sender, EventArgs e)
+        {
+            // 이미지 변경
+            // VK 애니메이션 제어.
+            if (_bVKLShiftButtonState == false)
+            {
+                _bVKLShiftButtonState = true;
+
+                // 피쳐박스에뿌려주기
+                pictureBoxShiftL.BackgroundImage = Properties.Resources.Shift_L_on;
+
+                keybd_event((byte)Keys.LShiftKey, 0, 0, 0);
+
+            }
+            else
+            {
+                _bVKLShiftButtonState = false;
+
+                // 피쳐박스에뿌려주기
+                pictureBoxShiftL.BackgroundImage = Properties.Resources.Shift_L_off;
+
+                keybd_event((byte)Keys.LShiftKey, 0, 0x02, 0);
+            }
+        }
+
+        //"K", "ㅋ"
+        private void pictureBoxZ_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.K, 0, 0, 0);
+                keybd_event((byte)Keys.K, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.Z, 0, 0, 0);
+                keybd_event((byte)Keys.Z, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"L", "ㅌ"
+        private void pictureBoxX_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.L, 0, 0, 0);
+                keybd_event((byte)Keys.L, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.X, 0, 0, 0);
+                keybd_event((byte)Keys.X, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"J", "ㅊ"
+        private void pictureBoxC_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.J, 0, 0, 0);
+                keybd_event((byte)Keys.J, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.C, 0, 0, 0);
+                keybd_event((byte)Keys.C, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"M", "ㅍ"
+        private void pictureBoxV_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.M, 0, 0, 0);
+                keybd_event((byte)Keys.M, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.V, 0, 0, 0);
+                keybd_event((byte)Keys.V, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"V", "ㅠ"
+        private void pictureBoxB_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.V, 0, 0, 0);
+                keybd_event((byte)Keys.V, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.B, 0, 0, 0);
+                keybd_event((byte)Keys.B, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"U", "ㅜ"
+        private void pictureBoxN_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.U, 0, 0, 0);
+                keybd_event((byte)Keys.U, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.N, 0, 0, 0);
+                keybd_event((byte)Keys.N, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        //"W", "ㅡ"
+        private void pictureBoxM_Click(object sender, EventArgs e)
+        {
+            SetDealerInfo();
+            if (_bVKKorEngButtonState)
+            {
+                keybd_event((byte)Keys.W, 0, 0, 0);
+                keybd_event((byte)Keys.W, 0, 0x02, 0);
+            }
+            else
+            {
+                keybd_event((byte)Keys.M, 0, 0, 0);
+                keybd_event((byte)Keys.M, 0, 0x02, 0);
+            }
+
+            ShiftClear();
+        }
+
+        /*
+         * 2021-01-14 현업요청
+         * 거래처 검색 후 검색창에서 다른영역 선택 시 검색창은 사라지도록 선택하도록 수정
+         */
+        private void SetDealerInfo()
+        {
+            if (listBoxCustomers.Visible == true)
+            {
+                listBoxCustomers.Visible = false;
+                // 거래처관련 변수들..
+                _CVCOD = string.Empty;
+                _CVNAM = string.Empty;
+                _FAXNO = string.Empty;
+                _FAXYN = string.Empty;
+                buttonCustomerClear.PerformClick();
+            }
+            else
+            {
+                _CVCOD = string.Empty;
+                _CVNAM = string.Empty;
+                _FAXNO = string.Empty;
+                _FAXYN = string.Empty;
+                buttonTab4Next.Visible = false;
+            }
+        }
+
+        private void pictureBoxShiftR_Click(object sender, EventArgs e)
+        {
+            // 이미지 변경
+            // VK 애니메이션 제어.
+            if (_bVKRShiftButtonState == false)
+            {
+                _bVKRShiftButtonState = true;
+
+                // 피쳐박스에뿌려주기
+                pictureBoxShiftR.BackgroundImage = Properties.Resources.Shift_R_on;
+
+                keybd_event((byte)Keys.RShiftKey, 0, 0, 0);
+
+            }
+            else
+            {
+                _bVKRShiftButtonState = false;
+
+                // 피쳐박스에뿌려주기
+                pictureBoxShiftR.BackgroundImage = Properties.Resources.Shift_R_off;
+
+                keybd_event((byte)Keys.RShiftKey, 0, 0x02, 0);
+            }
+        }
+
+        private void pictureBoxSpace_Click(object sender, EventArgs e)
+        {
+            keybd_event((byte)Keys.Space, 0, 0, 0);
+            keybd_event((byte)Keys.Space, 0, 0x02, 0);
+        }
+
+        private void pictureBoxHangul_Click(object sender, EventArgs e)
+        {
+            // 이미지 변경
+            // VK 애니메이션 제어.
+            if (_bVKKorEngButtonState == false)
+            {
+                _bVKKorEngButtonState = true;
+
+                // 피쳐박스에뿌려주기
+                pictureBoxHangul.BackgroundImage = Properties.Resources.한영_영문;
+            }
+            else
+            {
+                _bVKKorEngButtonState = false;
+
+                // 피쳐박스에뿌려주기
+                pictureBoxHangul.BackgroundImage = Properties.Resources.한영_한글;
+            }
+
+            keybd_event((byte)Keys.HangulMode, 0, 0, 0);
+        }
+
+        private void ShiftClear()
+        {
+            if (_bVKLShiftButtonState)
+            {
+                _bVKLShiftButtonState = false;
+
+                // 피쳐박스에뿌려주기
+                pictureBoxShiftL.BackgroundImage = Properties.Resources.Shift_L_off;
+
+                keybd_event((byte)Keys.LShiftKey, 0, 0x02, 0);
+            }
+
+            if (_bVKRShiftButtonState)
+            {
+                _bVKRShiftButtonState = false;
+
+                // 피쳐박스에뿌려주기
+                pictureBoxShiftR.BackgroundImage = Properties.Resources.Shift_R_off;
+
+                keybd_event((byte)Keys.RShiftKey, 0, 0x02, 0);
+            }
+        }
+
+        #endregion
+
+        #region[기초세팅]
+
+        private void InitWeighingValue()
+        {
+            _weighingType = WeighingType.None;
+            _weighingStep = WeighingStep.None;
+            _CARNO = string.Empty;
+
+            _state = WeighingState.None;
+            _weightFlag = false;
+            _stableCount = 0;
+            _weight = 0;
+
+            //2020-12-16
+            //자동등록을 위하여 변수추가
+            _confirm = ConfirmYN.NonConfirm;
+
+            // 2020.03.17
+            // - 거래처정보 추가
+            _CVCOD = string.Empty;                    // 거래처코드
+            _CVNAM = string.Empty;                    // 거래처명
+            _FAXNO = string.Empty;                    // 팩스번호
+            _FAXYN = string.Empty;                    // 웹팩스 사용여부
+            // 2020.03.18
+            // - 실적정보 추가
+            _SLINO = string.Empty;                    // 전표아이디
+            _TDATE = string.Empty;                    // 일자
+            _SEQNO = string.Empty;                    // 계근번호(순번)
+            _JOBGU = string.Empty;                    // 입출고구분 (I:입고 / O:출고)
+            _ITCOD = string.Empty;                    // 품목코드
+            _FTIME = string.Empty;                    // 1차계근 시간
+            _FWEIT = 0;                               //         중량 
+            _STIME = string.Empty;                    // 2차계근 시간
+            _SWEIT = 0;                               //         중량
+            _CHKYN = string.Empty;                    // 검수여부 ("0" 이 아니면 검수)
+            _LWEIT = 0;                               // 감량
+            _LOSGU = string.Empty;                    // 감가/감량사유
+            _INSRK = string.Empty;                    // 검수비고
+            _PLNCD = string.Empty;                    // 검수자코드
+            _PLNNM = string.Empty;                    // 검수자명
+            _RK = string.Empty;                       // 비고
+            // 2020.03.20
+            // - ticket image 추가
+            _selectedTicketImage_1_1 = string.Empty;
+            _selectedTicketImage_1_2 = string.Empty;
+            _selectedTicketImage_1_3 = string.Empty;
+            _selectedTicketImage_2_1 = string.Empty;
+            _selectedTicketImage_2_2 = string.Empty;
+            _selectedTicketImage_2_3 = string.Empty;
+        }
+
+        // 차량번호 초기화
+        private void InitVehicleNumber()
+        {
+            _CARNO = string.Empty;
+            textBoxVehicleNumber.Text = string.Empty;
+        }
+
+        private void InitUserControl()
+        {
+            tabControl1.SelectedIndex = 0;
+
+            tabControl1.Appearance = TabAppearance.FlatButtons;
+            tabControl1.ItemSize = new Size(0, 1);
+            tabControl1.SizeMode = TabSizeMode.Fixed;
+
+            foreach (TabPage tab in tabControl1.TabPages)
+            {
+                tab.Text = "";
+            }
+        }
+
+        private void InitLookUp()
+        {
+            _DicParams.Add("CMD", "ITEM_RETR");
+            DataTable dt = GetDataTable(PROCEDURE_ID, _DicParams);
+            if (dt != null)
+            {
+                Lk_ITCOD.Properties.DataSource = dt;
+                Lk_ITCOD.Properties.ValueMember = "ITCOD";
+                Lk_ITCOD.Properties.DisplayMember = "ITNAM";
+                Lk_ITCOD.ItemIndex = 0;
+                Lk_ITCOD.Properties.ShowHeader = false;
+                Lk_ITCOD.Properties.BestFitMode = DevExpress.XtraEditors.Controls.BestFitMode.BestFitResizePopup;
+                Lk_ITCOD.Properties.UseDropDownRowsAsMaxCount = true;
+            }
+        }
+
+        private void Initialize()
+        {
+            //화상키보드를 위한 후킹 함수 등록
+            InitHook(panelKeyboard.Handle);                     // 후킹 컨트롤 등록
+            InstallHook();
+
+            // 인디케이터 설정 (직접 연결방식)
+            /*
+            _indicator = new SerialPort();
+            _indicator.DataReceived += _indicator_DataReceived;
+            _indicator.ErrorReceived += _indicator_ErrorReceived;
+
+            int indicatorBaudRate = 0;
+            int.TryParse(_indicatorBaudRate, out indicatorBaudRate);
+            int indicatorDataBit = 0;
+            int.TryParse(_indicatorDataBit, out indicatorDataBit);
+
+            StopBits indicatorStopBits;
+            switch (_indicatorStopBit.ToLower())
+            {
+                case "one": indicatorStopBits = StopBits.One; break;
+                case "two": indicatorStopBits = StopBits.Two; break;
+                case "onepointfive": indicatorStopBits = StopBits.OnePointFive; break;
+                default: indicatorStopBits = StopBits.None; break;
+            }
+            Parity indicatorParity;
+            switch (_indicatorParityBit.ToLower())
+            {
+                case "none": indicatorParity = Parity.None; break;
+                case "odd": indicatorParity = Parity.Odd; break;
+                case "even": indicatorParity = Parity.Even; break;
+                case "mark": indicatorParity = Parity.Mark; break;
+                case "space": indicatorParity = Parity.Space; break;
+                default: indicatorParity = Parity.None; break;
+            }
+
+            _indicator.PortName = _indicatorPortName;
+            _indicator.BaudRate = indicatorBaudRate;
+            _indicator.DataBits = indicatorDataBit;
+            _indicator.StopBits = indicatorStopBits;
+            _indicator.Parity = indicatorParity;
+
+            _indicatorReceiveTime = DateTime.MinValue;
+            */
+            // 인디케이터 설정 (TCP/IP - IOT 장비방식)
+            tcpClient = new TcpClient();  // TcpClient 객체 생성
+            ipEnd = new IPEndPoint(IPAddress.Parse(_indicator_IOT_IP), int.Parse(_indicator_IOT_Port));  // IP주소와 Port번호를 할당
+
+            // DB 설정 - 커넥션스트링만 만들어 놓는다..
+            _connectionString = string.Concat
+            (
+                "SERVER = ", _dbAddress, "; ",
+                "DATABASE = ", _dbName, "; ",
+                "UID= ", _dbUser, "; ",
+                "PASSWORD = ", _dbPassword, "; "
+            // "Integrated Security = SSPI;"           // 윈도우 인증 시 연결스트링에 추가            
+            );
+
+            // FTP 설정
+            _ftpClient.Initialize(_ftpAddress, _ftpUser, _ftpPassword);
+            _ftpClient.FtpDirectioryCheck(_ftpUploadPath);
+
+            // 기타
+            _indicatorTimer = new System.Threading.Timer
+            (
+                new System.Threading.TimerCallback(OnIndicatorTimer),
+                this,
+                System.Threading.Timeout.Infinite,
+                System.Threading.Timeout.Infinite
+            );
+            _ftpTimer = new System.Threading.Timer
+            (
+                new System.Threading.TimerCallback(OnFtpTimer),
+                this,
+                System.Threading.Timeout.Infinite,
+                System.Threading.Timeout.Infinite
+            );
+            // 전표저장용 디렉토리 생성
+            string ticketDir = string.Concat(Application.StartupPath, @"\ticket");
+            if (!Directory.Exists(ticketDir))
+            {
+                Directory.CreateDirectory(ticketDir);
+                Log.AddLog(string.Concat("Create Directory..", ticketDir));
+            }
+            // 이미지 디렉토리 생성
+            string imageDir = string.Concat(Application.StartupPath, @"\image");
+            if (!Directory.Exists(imageDir))
+            {
+                Directory.CreateDirectory(imageDir);
+                Log.AddLog(string.Concat("Create Directory..", imageDir));
+            }
+            imageDir = string.Concat(Application.StartupPath, @"\image\upload");
+            if (!Directory.Exists(imageDir))
+            {
+                Directory.CreateDirectory(imageDir);
+                Log.AddLog(string.Concat("Create Directory..", imageDir));
+            }
+            imageDir = string.Concat(Application.StartupPath, @"\image\print");
+            if (!Directory.Exists(imageDir))
+            {
+                Directory.CreateDirectory(imageDir);
+                Log.AddLog(string.Concat("Create Directory..", imageDir));
+            }
+
+            Thread.Sleep(1000);
+            this.BringToFront();
+
+            // 2020.04.02
+            // - 로그삭제
+            Log.DeleteLogFile(_logDay);
+        }
+
+        // 오류 메시지 및 로그저장과 함께 로직 종료 메서드
+        private void QuitwithLog(string msg)
+        {
+            if (!string.IsNullOrEmpty(msg))
+            {
+                Log.AddLog(msg);
+                MessageBox.Show(new Form { TopMost = true }, msg);
+                return;
+            }
+        }
+
+        // 오류 메시지 및 로그저장과 함께 로직 종료 메서드 (중량확정 & 계량완료 페이지 (Page 4))
+        private void QuitwithLog_Page4(string msg)
+        {
+            if (!string.IsNullOrEmpty(msg))
+            {
+                Log.AddLog(msg);
+                MessageBox.Show(new Form { TopMost = true }, msg);
+                // 버튼 활성화
+                SetCompleteButton2(true);
+                SetPrvButton2(true);
+                return;
+            }
+        }
+        /*
+         * 2020-12-14 3초간 계근값 유지 후 5초간 아무런 액션이 없을 시 완료처리 하기위한 쓰레드 추가
+         */
+        Thread _T_CONFIRM;
+        DateTime _CurTime;
+        private bool is_AutoComplete = false;
+        private void AutoComplete()
+        {
+            _CurTime = DateTime.Now;
+            while (is_AutoComplete)
+            {
+                if (_confirm == ConfirmYN.NonConfirm && _state == WeighingState.Stable)
+                {
+                    //5초가 지나도록 완료버튼 처리가 되지 않을 시 저장처리
+                    TimeSpan dateDiff = DateTime.Now - _CurTime;
+                    if (dateDiff.Seconds > 5)
+                    {
+                        if (buttonTab5Complete.InvokeRequired)
+                        {
+                            buttonTab5Complete.BeginInvoke(new MethodInvoker(delegate
+                            {
+                                buttonTab5Complete.Enabled = false;
+                                buttonTab5Complete.Text = "완료";
+                            }));
+                        }
+                        else
+                        {
+                            buttonTab5Complete.Enabled = false;
+                        }
+
+                        if (buttonTab5Prev.InvokeRequired)
+                        {
+                            buttonTab5Prev.BeginInvoke(new MethodInvoker(delegate
+                            {
+                                buttonTab5Prev.Enabled = false;
+                            }));
+                        }
+                        else
+                        {
+                            buttonTab5Prev.Enabled = false;
+                        }
+
+                        Page4_Button_Click(buttonTab5Complete, null);
+
+                        if (buttonTab5Complete.InvokeRequired)
+                        {
+                            buttonTab5Complete.BeginInvoke(new MethodInvoker(delegate
+                            {
+                                buttonTab5Complete.Enabled = true;
+                                buttonTab5Complete.Text = "완료";
+                            }));
+                        }
+                        else
+                        {
+                            buttonTab5Complete.Enabled = true;
+                        }
+
+                        if (buttonTab5Prev.InvokeRequired)
+                        {
+                            buttonTab5Prev.BeginInvoke(new MethodInvoker(delegate
+                            {
+                                buttonTab5Prev.Enabled = true;
+                            }));
+                        }
+                        else
+                        {
+                            buttonTab5Prev.Enabled = true;
+                        }
+
+                        _CurTime = DateTime.Now;
+                        is_AutoComplete = false;
+                        //if (_T_CONFIRM != null)
+                        //{
+                        //    if (_T_CONFIRM.IsAlive)
+                        //    {
+                        //        _T_CONFIRM.Abort();
+                        //        break;
+                        //    }
+                        //    else
+                        //    {
+
+                        //    }
+                        //}
+                    }
+                }
+                else
+                {
+                    is_AutoComplete = false;
+                    //if (_T_CONFIRM != null)
+                    //{
+                    //    if (_T_CONFIRM.IsAlive)
+                    //    {
+                    //        _T_CONFIRM.Abort();
+                    //        break;
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    _T_CONFIRM.Abort();
+                    //    break;
+                    //}
+                }
+
+                Thread.Sleep(100);
+            }
+        }
+
+        private void ReadSettingData()
+        {
+            _ini = new IniFile(string.Concat(Application.StartupPath, @"\setting.ini"));
+            SetFileAttributes(string.Concat(Application.StartupPath, @"\setting.ini"), 34);     // ini 파일 숨김처리
+
+            try
+            {
+                _startWeight = Convert.ToInt32(_ini.GetIniValue("ENV", "StartWeight"));
+                _secondWeighingDay = Convert.ToInt32(_ini.GetIniValue("ENV", "SecondWeighingDay"));
+                _stableWeightCount = Convert.ToInt32(_ini.GetIniValue("ENV", "StableWeightCount"));
+                _writeIndicatorData = Convert.ToBoolean(_ini.GetIniValue("ENV", "WriteIndicatorData"));
+                _faxServiceIsTest = Convert.ToBoolean(_ini.GetIniValue("ENV", "FaxServiceIsTest"));
+                _faxNumber = _ini.GetIniValue("ENV", "FaxNumber");
+                _saveImage = Convert.ToBoolean(_ini.GetIniValue("ENV", "SaveImage"));
+                _ticketPrint = Convert.ToBoolean(_ini.GetIniValue("ENV", "TicketPrint"));
+                _X = Convert.ToSingle(_ini.GetIniValue("ENV", "PointX"));
+                _Y = Convert.ToSingle(_ini.GetIniValue("ENV", "PointY"));
+                _logDay = Convert.ToInt32(_ini.GetIniValue("ENV", "LogDay"));
+                _CVGUB = _ini.GetIniValue("ENV", "CvGubun");
+
+                _indicatorPortName = _ini.GetIniValue("INDICATOR", "PortName");
+                _indicatorBaudRate = _ini.GetIniValue("INDICATOR", "BaudRate");
+                _indicatorDataBit = _ini.GetIniValue("INDICATOR", "DataBit");
+                _indicatorStopBit = _ini.GetIniValue("INDICATOR", "StopBit");
+                _indicatorParityBit = _ini.GetIniValue("INDICATOR", "Parity");
+
+                _indicator_IOT_IP = _ini.GetIniValue("INDICATOR_IOT", "IP");
+                _indicator_IOT_Port = _ini.GetIniValue("INDICATOR_IOT", "Port");
+
+                _dbAddress = _ini.GetIniValue("DATABASE", "Address");
+                _dbName = _ini.GetIniValue("DATABASE", "Database");
+                _dbUser = _ini.GetIniValue("DATABASE", "User");
+                //_dbPassword = _ini.GetIniValue("DATABASE", "Password", true);     // 데이터의 암호화 상태여부
+                _dbPassword = _ini.GetIniValue("DATABASE", "Password"); //로컬테스트용
+
+                _ftpAddress = _ini.GetIniValue("FTP", "Address");
+                _ftpUser = _ini.GetIniValue("FTP", "User");
+                //_ftpPassword = _ini.GetIniValue("FTP", "Password", true); // 데이터의 암호화 상태여부
+                _ftpPassword = _ini.GetIniValue("FTP", "Password");  //로컬테스트용
+                _ftpUploadPath = _ini.GetIniValue("FTP", "UploadPath");
+
+                //2020-12-08 추가
+                int.TryParse(_ini.GetIniValue("ETC", "AutoCompleteTime"), out _autoCompleteSecond);
+            }
+            catch (Exception ex)
+            {
+                Log.AddLog(ex.Message);
+                MessageBox.Show(new Form { TopMost = true }, ex.Message);
+            }
+        }
+
+        private void Start()
+        {
+            try
+            {
+                //_indicator.Open();
+                if (indicator_thread == null || !indicator_thread.IsAlive)
+                {
+                    indicator_thread = new Thread(Connect);           // 쓰레드 객채 생성, Form과는 별도 쓰레드에서 Connect 함수가 실행됨
+                    indicator_thread.IsBackground = true;             // Form이 종료되면 쓰레드 종료
+                    indicator_thread.Start();                         // 쓰레드 시작
+                }
+                _indicatorTimer.Change(1000, System.Threading.Timeout.Infinite);
+                _ftpTimer.Change(1000, System.Threading.Timeout.Infinite);
+            }
+            catch (Exception ex)
+            {
+                Log.AddLog(ex.Message);
+                MessageBox.Show(new Form { TopMost = true }, ex.Message);
+            }
+        }
+
+        private void Connect()
+        {
+            try
+            {
+                tcpClient.Connect(ipEnd);  // 서버에 연결 요청
+
+                StreamReader sReader;
+                StreamWriter sWriter;
+                sReader = new StreamReader(tcpClient.GetStream());      // 읽기 스트림 연결
+                sWriter = new StreamWriter(tcpClient.GetStream());      // 쓰기 스트림 연결
+                sWriter.AutoFlush = true;                               // 쓰기 버퍼 자동으로 처리
+
+                while (tcpClient.Connected)                             // 클라이언트가 연결되어 있는 동안
+                {
+                    string receiveData = sReader.ReadLine();            // 수신 데이타를 읽어서 변수에 저장
+                                                                        //writeRichTextbox(receiveData);                      // 데이터를 수신창에 쓰기   
+                    if (receiveData.Contains("kg"))
+                        ReadData(receiveData);
+                    Thread.Sleep(50);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.AddLog(ex.Message);
+            }
+        }
+
+        private void Stop()
+        {
+            try
+            {
+                _shutdown = true;
+
+                _indicatorTimer.Change(System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+                _ftpTimer.Change(System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+
+                if (_indicator.IsOpen)
+                {
+                    _indicator.DataReceived -= _indicator_DataReceived;
+                    _indicator.ErrorReceived -= _indicator_ErrorReceived;
+                }
+
+                _indicator.Close();
+                _indicator = null;
+            }
+            catch (Exception ex)
+            {
+                Log.AddLog(ex.Message);
+            }
+        }
+
+        private void InputVehicleNumber(Button button)
+        {
+            string inputText = textBoxVehicleNumber.Text.Trim();
+            string buttonText = button.Text.Trim();
+
+            if (buttonText == "←")
+            {
+                if (inputText.Length > 0)
+                    inputText = inputText.Substring(0, inputText.Length - 1);
+            }
+            else
+            {
+                if (inputText.Length == 4)
+                    return;
+
+                inputText += buttonText;
+            }
+
+            _CARNO = inputText;
+            textBoxVehicleNumber.Text = inputText;
+        }
+
+        // 키 입력 유효성 검사
+        private void TextVehicleNumber_KeyDown(object sender, KeyEventArgs e)
+        {
+            // 숫자 0 ~ 9 허용
+            if (e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.D9) { e.SuppressKeyPress = false; }
+            // 숫자패드 (텐키) 0 ~ 9 허용
+            else if (e.KeyCode >= Keys.NumPad0 && e.KeyCode <= Keys.NumPad9) { e.SuppressKeyPress = false; }
+            // ESC / Delete / 백스페이스 / 탭키 허용
+            else if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back || e.KeyCode == Keys.Tab || e.KeyCode == Keys.Escape) { e.SuppressKeyPress = false; }
+            // 상하좌우 방향키 / 엔터키 허용
+            else if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right || e.KeyCode == Keys.Up || e.KeyCode == Keys.Down || e.KeyCode == Keys.Enter) { e.SuppressKeyPress = false; }
+            // 그 외 나머지 키 입력 불허
+            else { e.SuppressKeyPress = true; }
+        }
+
+        private int ExecuteNonQuery(string query, out string error)
+        {
+            error = string.Empty;
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(_connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    return cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+
+                return -1;
+            }
+        }
+
+        public object ExecuteScalar(string query, out string error)
+        {
+            error = string.Empty;
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(_connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    return cmd.ExecuteScalar();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+            }
+
+            return null;
+        }
+
+        private DataSet OpenSnapshot(string query, out string error)
+        {
+            error = string.Empty;
+
+            DataSet ds = new DataSet();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(_connectionString))
+                {
+                    SqlDataAdapter adapter = new SqlDataAdapter(query, conn);
+                    adapter.Fill(ds);
+
+                    return ds;
+                }
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+
+                return ds;
+            }
+        }
+
+        private void SelectTabPage(int no)
+        {
+            if (tabControl1.InvokeRequired)
+            {
+                SelectTabPageCallback d = new SelectTabPageCallback(SelectTabPage);
+                this.Invoke(d, new object[] { no });
+            }
+            else
+            {
+                tabControl1.SelectedIndex = no;
+            }
+        }
+
+        private void SetCompleteButton(bool enabled)
+        {
+            if (buttonTab5Complete.InvokeRequired)
+            {
+                SetCompleteButtonCallback d = new SetCompleteButtonCallback(SetCompleteButton);
+                this.Invoke(d, new object[] { enabled });
+            }
+            else
+            {
+                if (enabled)
+                {
+                    buttonTab5Complete.BackColor = Color.Orange;
+                }
+                else
+                {
+                    buttonTab5Complete.BackColor = Color.LightGray;
+                }
+                /*
+                 * 2021-01-22
+                 * 현업요청
+                 * 계근확정 전까지는 Visibla false 처리
+                 */
+                buttonTab5Complete.Visible = enabled;
+                buttonTab5Complete.Enabled = enabled;
+            }
+        }
+
+        private void SetCompleteButtonText(bool enabled, string sText)
+        {
+            if (buttonTab5Complete.InvokeRequired)
+            {
+                SetCompleteButtonCallback2 d = new SetCompleteButtonCallback2(SetCompleteButtonText);
+                this.Invoke(d, new object[] { enabled, sText });
+            }
+            else
+            {
+                buttonTab5Complete.Visible = enabled;
+                buttonTab5Complete.Text = sText;
+                buttonTab5Complete.Enabled = enabled;
+            }
+        }
+
+        private void SetCompleteButton2(bool enabled)
+        {
+            if (buttonTab5Complete.InvokeRequired)
+            {
+                SetCompleteButtonCallback3 d = new SetCompleteButtonCallback3(SetCompleteButton2);
+                this.Invoke(d, new object[] { enabled });
+            }
+            else
+            {
+                buttonTab5Complete.Enabled = enabled;
+            }
+        }
+
+        private void SetPrvButton2(bool enabled)
+        {
+            if (buttonTab5Prev.InvokeRequired)
+            {
+                SetCompleteButtonCallback3 d = new SetCompleteButtonCallback3(SetPrvButton2);
+                this.Invoke(d, new object[] { enabled });
+            }
+            else
+            {
+                buttonTab5Prev.Enabled = enabled;
+            }
+        }
+
+        private void SetCompleteButtonVisible(bool enabled)
+        {
+            if (buttonTab5Complete.InvokeRequired)
+            {
+                SetCompleteButtonCallback3 d = new SetCompleteButtonCallback3(SetCompleteButtonVisible);
+                this.Invoke(d, new object[] { enabled });
+            }
+            else
+            {
+                buttonTab5Complete.Visible = enabled;
+            }
+        }
+
+        private void SetNextButtonVisible(bool enabled)
+        {
+            if (buttonTab5Next.InvokeRequired)
+            {
+                SetCompleteButtonCallback3 d = new SetCompleteButtonCallback3(SetNextButtonVisible);
+                this.Invoke(d, new object[] { enabled });
+            }
+            else
+            {
+                buttonTab5Next.Visible = enabled;
+            }
+        }
+
+        private void SetInitVehicleNumber(bool enabled)
+        {
+            if (textBoxVehicleNumber.InvokeRequired)
+            {
+                SetCompleteButtonCallback3 d = new SetCompleteButtonCallback3(SetInitVehicleNumber);
+                this.Invoke(d, new object[] { enabled });
+            }
+            else
+            {
+                textBoxVehicleNumber.Text = "";
+            }
+        }
+
+        private void InitTicketImage()
+        {
+            label1.Text = "";                           // 거래처명
+            label2.Text = "";                           // 일자
+            label3.Text = "";                           // 입출고
+            label4.Text = "";                           // 계근번호
+            label5.Text = "";                           // 품명
+            label6.Text = "";                           // 차량번호
+            label7.Text = "";                           // 검수자
+            label8.Text = "";                           // 총중량
+            label9.Text = "";                           // 공차중량
+            label10.Text = "";                          // 실중량
+            label11.Text = "";                          // 등급명
+            label12.Text = "";                          // 감량
+            label13.Text = "";                          // 감량사유
+            pictureBoxIn1.BackgroundImage = null;       // 입차이미지 - 1
+            pictureBoxIn2.BackgroundImage = null;       //           - 2
+            pictureBoxIn3.BackgroundImage = null;       //           - 3
+            pictureBoxOut1.BackgroundImage = null;      // 출차이미지 - 1
+            pictureBoxOut2.BackgroundImage = null;      //           - 2
+            pictureBoxOut3.BackgroundImage = null;      //           - 3
+        }
+        #endregion
+
+        #region[FTP 관련 외]
+
+        //FTP 
+        void OnFtpTimer(object state)
+        {
+            _ftpTimer.Change(System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+
+            bool error = false;
+
+            string[] uploadFiles = Directory.GetFiles(string.Concat(Application.StartupPath, @"\image\upload"), "*.jpg");
+            if (uploadFiles.Length > 0)
+            {
+                foreach (string file in uploadFiles)
+                {
+
+                    DateTime fileDt = File.GetCreationTime(file);
+
+                    if (!CreateFtpUploadDirectory(fileDt))
+                    {
+                        error = true;
+                        break;
+                    }
+
+                    if (!_ftpClient.FtpUpload(_ftpClient.Host, _currentFtpLocation, file))
+                    {
+                        error = true;
+                        break;
+                    }
+
+                    Log.AddLog(string.Concat("FTP Upload.. ", Path.GetFileName(file)));
+
+                    // 업로드 완료되었으므로 해당파일 삭제
+                    File.Delete(file);
+                }
+            }
+
+            if (!_shutdown)
+            {
+                if (error)
+                    _ftpTimer.Change(30000, System.Threading.Timeout.Infinite);
+                else
+                    _ftpTimer.Change(5000, System.Threading.Timeout.Infinite);
+            }
+        }
+
+        private bool CreateFtpUploadDirectory(DateTime dt)
+        {
+            if (!_ftpClient.FtpDirectioryCheck(string.Concat(_ftpUploadPath, "/", dt.ToString("yyyy"))))
+                return false;
+
+            if (!_ftpClient.FtpDirectioryCheck(string.Concat(_ftpUploadPath, "/", dt.ToString("yyyy"), "/", dt.ToString("MM"))))
+                return false;
+
+            if (!_ftpClient.FtpDirectioryCheck(string.Concat(_ftpUploadPath, "/", dt.ToString("yyyy"), "/", dt.ToString("MM"), "/", dt.ToString("yyyy-MM-dd"))))
+                return false;
+
+            _currentFtpLocation = string.Concat(_ftpUploadPath, "/", dt.ToString("yyyy"), "/", dt.ToString("MM"), "/", dt.ToString("yyyy-MM-dd"));
+
+            return true;
+        }
+
+        public byte[] ImageToByteArray(System.Drawing.Image imageIn)
+        {
+            using (var ms = new MemoryStream())
+            {
+                imageIn.Save(ms, imageIn.RawFormat);
+                return ms.ToArray();
+            }
+        }
+        /// <summary>
+        /// FTP 경로의 디렉토리를 점검하고 없으면 생성
+        /// </summary>
+        /// <param name="directoryPath">디렉터리 경로 입니다.</param>
+        public void FTPDirectioryCheck(string directoryPath, string _FTPuserID, string _FTPpassword)
+        {
+            string[] directoryPaths = directoryPath.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
+            string[] result = new string[directoryPaths.Length - 1];
+            for (int i = 0; i < result.Length; i++)
+            {
+                if (i == 0)
+                {
+                    result[i] = directoryPaths[i] + "//" + directoryPaths[i + 1];
+                }
+                else
+                {
+                    result[i] = directoryPaths[i + 1];
+                }
+            }
+
+            string currentDirectory = string.Empty;
+            foreach (string directory in result)
+            {
+                currentDirectory += string.Format("{0}/", directory);
+                if (!IsExistDirectory(currentDirectory, _FTPuserID, _FTPpassword))
+                {
+                    MakeDirectory(currentDirectory, _FTPuserID, _FTPpassword);
+                }
+            }
+        }
+
+        private bool IsExistDirectory(string Directory, string _FTPuserID, string _FTPpassword)
+        {
+            try
+            {
+                var request = (FtpWebRequest)WebRequest.Create(Directory);
+                request.Method = WebRequestMethods.Ftp.ListDirectory;
+                request.Credentials = new NetworkCredential(_FTPuserID, _FTPpassword);
+
+                using (request.GetResponse())
+                {
+                    return true;
+                }
+            }
+            catch (WebException)
+            {
+                return false;
+            }
+        }
+
+        private bool MakeDirectory(string Directory, string _FTPuserID, string _FTPpassword)
+        {
+            string URI = Directory;
+
+            System.Net.FtpWebRequest ftp = WebRequest.Create(new Uri(URI)) as FtpWebRequest;
+            ftp.Credentials = new NetworkCredential(_FTPuserID, _FTPpassword);
+            ftp.UseBinary = true;
+            ftp.UsePassive = true;
+            ftp.Timeout = 10000;
+            ftp.Method = System.Net.WebRequestMethods.Ftp.MakeDirectory;
+
+            try
+            {
+                string str = GetStringResponse(ftp);
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private string GetStringResponse(FtpWebRequest ftp)
+        {
+            string result = "";
+            using (FtpWebResponse response = (FtpWebResponse)ftp.GetResponse())
+            {
+                long size = response.ContentLength;
+                using (Stream datastream = response.GetResponseStream())
+                {
+                    if (datastream != null)
+                    {
+                        using (StreamReader sr = new StreamReader(datastream))
+                        {
+                            result = sr.ReadToEnd();
+                            sr.Close();
+                        }
+
+                        datastream.Close();
+                    }
+                }
+
+                response.Close();
+            }
+
+            return result;
+        }
+        /// <summary>
+        /// FTP 경로에 Upload
+        /// </summary>
+        /// <param name="directoryPath">디렉터리 경로 입니다.</param>
+        public void FTPUpload(string directoryPath, string _FTPuserID, string _FTPpassword, byte[] data)
+        {
+            //업로드 위한 설정
+            FtpWebRequest req = (FtpWebRequest)WebRequest.Create(directoryPath);
+            req.Method = WebRequestMethods.Ftp.UploadFile;
+            req.Credentials = new NetworkCredential(_FTPuserID, _FTPpassword);
+            req.UsePassive = false;
+            // RequestStream에 데이터를 쓴다
+            req.ContentLength = data.Length;
+            Stream reqStream = req.GetRequestStream();
+            reqStream.Write(data, 0, data.Length);
+            reqStream.Close();
+
+            FtpWebResponse response = (FtpWebResponse)req.GetResponse();
+            response.Close();
+        }
+        #endregion
+
+        #region[그 외]
+        private void pictureBoxDJ_DoubleClick(object sender, EventArgs e)
+        {
+            if (tabControl1.SelectedIndex == 0)
+            {
+                using (SettingForm form = new SettingForm())
+                    form.ShowDialog();
+            }
+        }
+        private void panelExit_DoubleClick(object sender, EventArgs e)
+        {
+            // 대지에스텍 요청으로 특정화면 특정위치를 더블클릭하면 종료진행
+            // - 입고 -> 2차계량버튼 우측하단부분
+            if (_weighingType == WeighingType.In)
+            {
+                this.Close();
+            }
+        }
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult result = DialogResult.None;
+            result = MessageBox.Show
+            (new Form { TopMost = true },
+                "프로그램을 종료하시겠습니까?",
+                "무인계근시스템",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2
+            );
+
+            if (result != DialogResult.Yes)
+            {
+                e.Cancel = true;
+                return;
+            }
+            Log.AddLog("프로그램이 종료됩니다 - 사용자 종료");
+        }
+        private void c1DockingTabPage4_Click(object sender, EventArgs e)
+        {
+            PictureBox pic = new PictureBox();
+            Button btn = new Button();
+            if (!e.Equals(btn) || !e.Equals(pic))
+            {
+                textBoxCustomer.Focus();
+                //keybd_event(null, 0, 0, 0);
+                //keybd_event(null, 0, 0x02, 0);
+                ShiftClear();
+            }
+        }
+        private static DateTime Delay(int MS)
+        {
+            DateTime ThisMoment = DateTime.Now;
+            TimeSpan duration = new TimeSpan(0, 0, 0, 0, MS);
+            DateTime AfterWards = ThisMoment.Add(duration);
+            while (AfterWards >= ThisMoment)
+            {
+                System.Windows.Forms.Application.DoEvents(); ThisMoment = DateTime.Now;
+            }
+            return DateTime.Now;
+        }
+        #endregion
+
+        #region[CCTV관련]
+        //CCTV
+        private volatile bool _shouldStop;
+        private void MONITERING()
+        {
+            RTSP_Init();
+            StartAll();
+        }
+
+        // 카메라 RTSP 정보 불러오기 메서드
+        private void RTSP_Init()
+        {
+            RSTPaddr1 = _ini.GetIniValue("CAM", "CAM1");
+            RSTPaddr2 = _ini.GetIniValue("CAM", "CAM2");
+            RSTPaddr3 = _ini.GetIniValue("CAM", "CAM3");
+        }
+
+        #region [CCTV 영상 가져오기 쓰레드]
+        // 쓰레드 시작 메서드
+        private void StartAll()
+        {
+            if (t_Camera1 == null || !t_Camera1.IsAlive)
+            {
+                t_Camera1 = new Thread(new ThreadStart(StartCamera1));
+                t_Camera1.IsBackground = true;
+                t_Camera1.Start();
+            }
+            if (t_Camera2 == null || !t_Camera2.IsAlive)
+            {
+                t_Camera2 = new Thread(new ThreadStart(StartCamera2));
+                t_Camera2.IsBackground = true;
+                t_Camera2.Start();
+            }
+            //if (t_Camera3 == null || !t_Camera3.IsAlive)
+            //{
+            //    t_Camera3 = new Thread(new ThreadStart(StartCamera3));
+            //    t_Camera3.IsBackground = true;
+            //    t_Camera3.Start();
+            //}
+            if (_T_CONFIRM == null || !_T_CONFIRM.IsAlive)
+            {
+                _T_CONFIRM = new Thread(new ThreadStart(AutoComplete));
+                _T_CONFIRM.IsBackground = true;
+                _T_CONFIRM.Start();
+            }
+        }
+
+        // 1번 카메라 쓰레드 (반복)
+        private void StartCamera1()
+        {
+            try
+            {
+                while (!_shouldStop)
+                {
+                    try
+                    {
+                        lock (_lockCamera1)
+                        {
+                            if (!isConnected)
+                            {
+                                string RSTPaddr = RSTPaddr1;
+                                capture1 = new VideoCapture(RSTPaddr);
+                                frame1 = new Mat();
+                                isConnected = true;
+                            }
+
+                            //if (!capture1.Read(frame1))
+                            //{
+                            //    Cv2.WaitKey();
+                            //}
+
+                            bool readOk = capture1.Read(frame1);
+
+                            if (!readOk || frame1 == null || frame1.Empty() || frame1.Width <= 0 || frame1.Height <= 0)
+                            {
+                                Log.AddLog("StartCamera1: 카메라 프레임을 읽지 못했습니다.");
+                                Thread.Sleep(500);
+                                continue;
+                            }
+
+
+                            pictureBox14.Image = BitmapConverter.ToBitmap(frame1);
+                            Process pro = Process.GetCurrentProcess(); // 현재 프로세스 사용량
+                            long memory = pro.VirtualMemorySize64;
+
+                            // 500mb
+                            if (memory > 1000000000)
+                            {
+                                //isConnected = false;
+                                //capture1.Release();
+                            }
+
+                            if (Cv2.WaitKey(1) >= 0)
+                                break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        isConnected = false;
+
+                        Log.AddLog("StartCamera1 오류: " + ex.ToString());
+                        //MessageBox.Show(ex.ToString());
+                    }
+                    Thread.Sleep(1);
+                }
+            }
+            catch
+            {
+                
+            }
+        }
+        public Bitmap ResizeBitmap(Bitmap bmp, int width, int height)
+        {
+            Bitmap result = new Bitmap(width, height);
+            using (Graphics g = Graphics.FromImage(result))
+            {
+                g.DrawImage(bmp, 0, 0, width, height);
+            }
+
+            return result;
+        }
+        // 2번 카메라 쓰레드 (반복)
+        private void StartCamera2()
+        {
+            try
+            {
+                while (!_shouldStop)
+                {
+                    try
+                    {
+                        lock (_lockCamera2)
+                        {
+                            if (!isConnected)
+                            {
+                                string RSTPaddr = RSTPaddr2;
+                                capture2 = new VideoCapture(RSTPaddr);
+                                frame2 = new Mat();
+                                isConnected = true;
+                            }
+
+                            //if (!capture2.Read(frame2))
+                            //{
+                            //    Cv2.WaitKey();
+                            //}
+
+                            bool readOk = capture2.Read(frame2);
+
+                            if (!readOk || frame2 == null || frame2.Empty() || frame2.Width <= 0 || frame2.Height <= 0)
+                            {
+                                Log.AddLog("StartCamera2: 카메라 프레임을 읽지 못했습니다.");
+                                Thread.Sleep(500);
+                                continue;
+                            }
+
+                            pictureBox13.Image = BitmapConverter.ToBitmap(frame2);
+                            Process pro = Process.GetCurrentProcess(); // 현재 프로세스 사용량
+                            long memory = pro.VirtualMemorySize64;
+
+                            // 500mb
+                            if (memory > 1000000000)
+                            {
+                                //isConnected = false;
+                                // capture2.Release();
+                            }
+                            if (Cv2.WaitKey(1) >= 0)
+                                break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        isConnected = false;
+
+                        Log.AddLog("StartCamera2 오류: " + ex.ToString());
+                        //MessageBox.Show(ex.ToString());
+                    }
+                    Thread.Sleep(1);
+                }
+            }
+            catch
+            {
+                
+            }
+        }
+        private void StartCamera3()
+        {
+            try
+            {
+                while (!_shouldStop)
+                {
+                    try
+                    {
+                        lock (_lockCamera3)
+                        {
+                            if (!isConnected)
+                            {
+                                string RSTPaddr = RSTPaddr3;
+                                capture3 = new VideoCapture(RSTPaddr);
+                                frame3 = new Mat();
+                                isConnected = true;
+                            }
+
+                            //if (!capture3.Read(frame3))
+                            //{
+                            //    Cv2.WaitKey();
+                            //}
+
+                            bool readOk = capture3.Read(frame3);
+
+                            if (!readOk || frame3 == null || frame3.Empty() || frame3.Width <= 0 || frame3.Height <= 0)
+                            {
+                                Log.AddLog("StartCamera3: 카메라 프레임을 읽지 못했습니다.");
+                                Thread.Sleep(500);
+                                continue;
+                            }
+
+                            pictureBox12.Image = BitmapConverter.ToBitmap(frame3);
+                            Process pro = Process.GetCurrentProcess(); // 현재 프로세스 사용량
+                            long memory = pro.VirtualMemorySize64;
+
+                            // 500mb
+                            if (memory > 1000000000)
+                            {
+                                //isConnected = false;
+                                //capture3.Release();
+                            }
+                            if (Cv2.WaitKey(1) >= 0)
+                                break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        isConnected = false;
+
+                        Log.AddLog("StartCamera3 오류: " + ex.ToString());
+                        //MessageBox.Show(ex.ToString());
+                    }
+                    Thread.Sleep(1);
+                }
+            }
+            catch
+            {
+
+                
+            }
+        }
+        #endregion
+        #endregion
+
+        #region [크로스 스레드]
+        delegate void CrossThreadSafetySetText(Control ctl, object obj);
+        private void CSafeSetText(Control ctl, object obj)
+        {
+            if (ctl.InvokeRequired)
+                ctl.Invoke(new CrossThreadSafetySetText(CSafeSetText), ctl, obj);
+            else
+                ctl.Text = obj.ToString();
+        }
+
+        delegate void CrossThreadSafetySetForeColor(Control ctl, Color color);
+        private void CSafeSetForeColor(Control ctl, Color color)
+        {
+            if (ctl.InvokeRequired)
+                ctl.Invoke(new CrossThreadSafetySetForeColor(CSafeSetForeColor), ctl, color);
+            else
+                ctl.ForeColor = color;
+        }
+
+        delegate void CrossThreadSafetySetBackgroundImage(Control ctl, Image img);
+        private void CSafeSetBackgroundImage(Control ctl, Image img)
+        {
+            if (ctl.InvokeRequired)
+                ctl.Invoke(new CrossThreadSafetySetBackgroundImage(CSafeSetBackgroundImage), ctl, img);
+            else
+                ctl.BackgroundImage = img;
+        }
+
+        delegate void CrossThreadSafetySetLocation(Control ctl, System.Drawing.Point pt);
+        private void CSafeSetLocation(Control ctl, System.Drawing.Point pt)
+        {
+            if (ctl.InvokeRequired)
+                ctl.Invoke(new CrossThreadSafetySetLocation(CSafeSetLocation), ctl, pt);
+            else
+                ctl.Location = pt;
+        }
+
+        delegate void CrossThreadSafetySetImage(PictureEdit ctl, Image img);
+        private void CSafeSetImage(PictureEdit ctl, Image img)
+        {
+            if (ctl.InvokeRequired)
+                ctl.Invoke(new CrossThreadSafetySetImage(CSafeSetImage), ctl, img);
+            else
+                ctl.Image = img;
+        }
+
+        delegate void CrossThreadSafetySetImageBox(PictureBox ctl, Image img);
+        private void CSafeSetImageBox(PictureBox ctl, Image img)
+        {
+            if (ctl.InvokeRequired)
+                ctl.Invoke(new CrossThreadSafetySetImageBox(CSafeSetImageBox), ctl, img);
+            else
+                ctl.Image = img;
+        }
+        delegate void CrossThreadSafetySetTextMemo(MemoEdit ctl, string str);
+        private void CSafeSetmemoEdit(MemoEdit ctl, string str)
+        {
+            if (ctl.InvokeRequired)
+            {
+                ctl.Invoke(new CrossThreadSafetySetTextMemo(CSafeSetmemoEdit), ctl, str);
+            }
+            else
+            {
+                ctl.Text = str;
+            }
+        }
+        #endregion
+
+        #region [프로그램 종료]
+        private void label1_Click(object sender, EventArgs e)
+        {
+            _shouldStop = true;
+            is_AutoComplete = false;
+            Dispose();
+        }
+        #endregion
+
+        #region [버튼이벤트]
+        private void BtnClose_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void btnCapture_Click_1(object sender, EventArgs e)
+        {
+            SelectTabPage(0);
+        }
+
+        #endregion
+
+        // 프로그램 실행 시, FTP 임시폴더 검사후, 잔류파일 삭제 (현재기준 : -30일)
+        private void InitFTPFile()
+        {
+            string appPath = Application.StartupPath;
+            string ImagePath = string.Concat(appPath, @"\image\");             // 이미지파일 경로
+            string PastDate = DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd"); // 프로그램 실행일자 -30일
+            string error = string.Empty;
+
+            try
+            {
+                // 계근일자가 한 달 전인 전표번호의 최댓값 조회
+                _DicParams.Add("CMD", "PRE_MONTH_MAX_SLINO");
+                _DicParams.Add("TDATE", PastDate);
+                DataTable dt = GetDataTable(PROCEDURE_ID, _DicParams);
+                if (dt != null)
+                {
+                    if (dt.Rows.Count > 0)
+                    {
+                        // 25.04.17, 전표번호가 숫자형식이 아님 (WyyMMdd001)
+                        // 1~7자리 : yyMMdd
+                        string MaxDate = dt.Rows[0]["SLINO"]?.ToString().Substring(1, 6);
+
+                        // 빈 값이면 아무 작업없이 로직 종료
+                        if (!string.IsNullOrEmpty(MaxDate))
+                        {
+                            // 폴더경로에 전표번호 최댓값보다 작은 전표번호의 이미지 비교 후 삭제
+                            DirectoryInfo di = new DirectoryInfo(ImagePath);
+                            // 폴더경로의 각각의 파일 검사
+                            foreach (FileInfo File in di.GetFiles())
+                            {
+                                int SLINO_ID = Convert.ToInt32(File.Name.Substring(1, 6));
+
+                                if (Convert.ToInt32(MaxDate) >= SLINO_ID)
+                                    File.Delete();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        private void Bt_Home_Click(object sender, EventArgs e)
+        {
+            SelectTabPage(0);
+        }
+
+        private void panelCCTV_DoubleClick(object sender, EventArgs e)
+        {
+            SelectTabPage(6);
+        }
+
+        #region [ GetDataTable ]
+        private Dictionary<string, object> _DicParams = new Dictionary<string, object>();
+        private DataTable GetDataTable(string spName, Dictionary<string, object> dicParams)
+        {
+            DataSet ds = new DataSet();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(_connectionString))
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand(spName, conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        foreach (KeyValuePair<string, object> item in dicParams)
+                        {
+                            string pname = string.Format("@{0}", item.Key);
+                            cmd.Parameters.AddWithValue(pname, item.Value);
+                            //cmd.Parameters.Add(pname, SqlDbType.NVarChar);
+                            //cmd.Parameters[pname].Value = item.Value;
+                        }
+
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        da.Fill(ds);
+                    }
+                }
+
+                return ds.Tables[0];
+            }
+            catch (SqlException sqlEx)
+            {
+                //throw sqlEx;
+                return null;
+            }
+            catch (Exception ex)
+            {
+                //throw ex;
+                return null;
+            }
+            finally
+            {
+                if ((ds != null)) ds.Dispose();
+                _DicParams.Clear();
+            }
+        }
+
+        private DataTable GetDataTable(string strSql)
+        {
+            DataSet ds = new DataSet();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(_connectionString))
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand(strSql, conn))
+                    {
+                        cmd.CommandType = CommandType.Text;
+                        //cmd.CommandText = strSql;
+
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        da.Fill(ds);
+                    }
+                }
+                return ds.Tables[0];
+            }
+            catch (SqlException sqlEx)
+            {
+                throw sqlEx;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if ((ds != null)) ds.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// 오늘 날짜와 자동 번호매김을 조합하여 전표번호 생성 메서드
+        /// </summary>
+        /// <param name="code">전표 구분자 ex) S, T, W , ...</param>
+        /// <param name="date">오늘날짜</param>
+        /// <param name="fieldname">해당 테이블의 전표번호 필드명 ex) SLINO, PONO, ...</param>
+        /// <param name="tablename">전표번호 체크 대상 테이블명</param>
+        /// <returns>자동채번된 전표번호 문자열</returns>
+        private string gp_NextSlipNo(string code, string date, string fieldname, string tablename)
+        {
+            StringBuilder strSql = new StringBuilder();
+            strSql.Clear();
+            if (tablename.Equals("ITEMAS"))
+            {
+                strSql.AppendLine("SELECT ( CASE WHEN ISNULL(MAX(RIGHT(ITCOD,5)),'')= ''");
+                strSql.AppendLine("              THEN 'IT00001'                         ");
+                strSql.AppendLine("              ELSE CONCAT('IT', RIGHT('00000' + CAST(CONVERT(INT, RIGHT(MAX(ITCOD), 5)) + 1 AS VARCHAR) , 5)) END ) AUTOSLINO ");
+                strSql.AppendLine("  FROM ITEMAS ");
+            }
+            else if (tablename.Equals("ITEMPF"))
+            {
+                strSql.AppendLine("SELECT ( CASE WHEN ISNULL(MAX(RIGHT(ITCOD,3)),'')= ''");
+                strSql.AppendLine("              THEN 'IT001'                         ");
+                strSql.AppendLine("              ELSE CONCAT('IT', RIGHT('000' + CAST(CONVERT(INT, RIGHT(MAX(ITCOD), 3)) + 1 AS VARCHAR) , 3)) END ) AUTOSLINO ");
+                strSql.AppendLine("  FROM ITEMPF ");
+            }
+            else if (tablename.Equals("zUSRLST"))
+            {
+                strSql.AppendLine("SELECT ( CASE WHEN ISNULL(MAX(RIGHT(USRCD,5)),'')= ''");
+                strSql.AppendLine("              THEN '00000'                         ");
+                strSql.AppendLine("              ELSE RIGHT('00000' + CAST(CONVERT(INT, RIGHT(MAX(USRCD), 5)) + 1 AS VARCHAR) , 5) END ) AUTOSLINO ");
+                strSql.AppendLine("  FROM zUSRLST ");
+            }
+            else
+            {
+                strSql.AppendLine(" DECLARE @NO VARCHAR(15)='" + code + date + "';   ");
+                strSql.AppendLine(" SELECT (CASE WHEN ISNULL(MAX(" + fieldname + "), '')='' THEN REPLACE(@NO, '%', '') + '001'    ");
+                strSql.AppendLine(" ELSE SUBSTRING(MAX(" + fieldname + "), 1, 7) + RIGHT('000' + CAST(CONVERT(INT, SUBSTRING(MAX(" + fieldname + "), 8, 3)) + 1 AS VARCHAR), 3) END) AUTOSLINO  ");
+                strSql.AppendLine(" FROM " + tablename + " ");
+                strSql.AppendLine(" WHERE " + fieldname + " LIKE '%' + @NO + '%' ");
+            }
+            DataTable dt = GetDataTable(strSql.ToString());
+            return dt.Rows[0]["AUTOSLINO"].ToString();
+        }
+        #endregion
+
+        private void textBoxCustomer_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                buttonCustomerSearch.PerformClick();
+            }
+        }
+
+        private void Tx_Item_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                Bt_Item_Search.PerformClick();
+            }
+        }
+
+        private void Tx_Word_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                Bt_List_Search.PerformClick();
+            }
+        }
+
+        Thread thread;
+        StreamReader sReader;
+        StreamWriter sWriter;
+        private void IndicatorStart()
+        {
+            try
+            {
+                if (thread == null || !thread.IsAlive)
+                {
+                    thread = new Thread(ConnectAlways);           // 쓰레드 객채 생성, Form과는 별도 쓰레드에서 Connect 함수가 실행됨
+                    thread.IsBackground = true;             // Form이 종료되면 쓰레드 종료
+                    thread.Start();                         // 쓰레드 시작
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        // TCP/IP 연결 시작
+        private void ConnectAlways()
+        {
+            try
+            {
+                tcpClient = new TcpClient();  // TcpClient 객체 생성
+                IPEndPoint ipEnd = new IPEndPoint(IPAddress.Parse(_indicator_IOT_IP), int.Parse(_indicator_IOT_Port));  // IP주소와 Port번호를 할당
+                tcpClient.Connect(ipEnd);  // 서버에 연결 요청
+
+                sReader = new StreamReader(tcpClient.GetStream());      // 읽기 스트림 연결
+                sWriter = new StreamWriter(tcpClient.GetStream());      // 쓰기 스트림 연결
+                sWriter.AutoFlush = true;                               // 쓰기 버퍼 자동으로 처리
+
+                while (tcpClient.Connected)                             // 클라이언트가 연결되어 있는 동안
+                {
+                    string receiveData = sReader.ReadLine();            // 수신 데이타를 읽어서 변수에 저장  
+                    if (receiveData.Contains("kg"))
+                        ReadDataAlways(receiveData);
+                    Thread.Sleep(50);
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        // 저울 값 읽기
+        private void ReadDataAlways(string readData)
+        {
+            /*
+            try
+            {
+                if (readData.Length == 16)
+                {
+                    string state = readData.Substring(0, 2);
+                    string kg = readData.Substring(14, 2).ToLower();
+                    int weight = 0;
+
+                    if (int.TryParse(readData.Substring(7, 7), out weight) && kg == "kg")
+                    {
+                        // 데이터를 수신창에 표시, 반드시 invoke 사용 (충돌을 피하기 위함)
+                        indicator2.Invoke((MethodInvoker)delegate { indicator2.Weight = weight; });
+                    }
+                    else
+                    {
+                        indicator2.Invoke((MethodInvoker)delegate { indicator2.Weight = 0; });
+                    }
+                }
+                else
+                {
+                    indicator2.Invoke((MethodInvoker)delegate { indicator2.Weight = 0; });
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            */
+
+
+
+            lock (_lockObject)
+            {
+                try
+                {
+                    if (!_shutdown)
+                    {
+                        _indicatorReceiveTime = DateTime.Now;
+
+                        if (_writeIndicatorData)
+                            Log.AddLog(string.Concat("Indicator data - ", readData));
+
+                        if (readData.Length == 16)
+                        {
+
+                            string state = readData.Substring(0, 2);
+                            string kg = readData.Substring(14, 2).ToLower();
+                            int weight = 0;
+
+                            if (int.TryParse(readData.Substring(7, 7), out weight) && kg == "kg")
+                            {
+                                // 계량중량표시..
+                                indicator.Weight = weight;
+                                indicator2.Weight = weight;
+
+                                //ERP 요청값 처리를 위하여 추가세팅
+                                Indicator_Thread.Weight = weight;
+                                //_iWeight = weight;//소나무 정보기술 로직 추가 하단 코드 참조
+
+                                // 계량시작 인식중량보다 크면 계량시작!!
+                                if (weight > _startWeight)
+                                {
+                                    if (!_weightFlag)
+                                    {
+                                        // 계량이 시작됨
+                                        _weightFlag = true;
+
+                                        Log.AddLog("계량상태 변경 : Standby -> Start");
+                                        _state = WeighingState.Start;
+                                        SetCompleteButton(false);
+                                        // 계량관련 데이터 초기화
+                                        _weight = 0;
+                                        _stableCount = 0;
+                                    }
+
+                                    if (state == "ST")
+                                        _stableCount++;           // 인디케이터 값이 안정적임
+
+                                    if (state == "US")
+                                    {
+                                        _stableCount = 0;
+
+                                        if (_state == WeighingState.Stable)
+                                        {
+                                            Log.AddLog("계량상태 변경 : Stable -> Start");
+
+                                            _state = WeighingState.Start;
+                                            SetCompleteButton(false);
+                                        }
+
+                                        indicator.Stable = false;
+                                    }
+
+                                    if (_stableCount >= _stableWeightCount)
+                                    {
+                                        // 계량 중량 확정    
+                                        _weight = weight;
+
+                                        if (_state == WeighingState.Start)
+                                        {
+                                            Log.AddLog("계량상태 변경 : Start -> Stable");
+
+                                            _state = WeighingState.Stable;
+
+                                            indicator.Stable = true;
+
+                                            SetCompleteButton(true);
+
+                                            /*
+                                             * 2020-12-08 
+                                             * 중량확정 시 5초간 아무런 액션이 없을 시 자동으로 완료처리되도록 로직추가
+                                             */
+
+                                            is_AutoComplete = true;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        is_AutoComplete = false;
+                                    }
+                                }
+                                else
+                                {
+                                    // 계량상태가 아님..
+                                    _weightFlag = false;
+
+                                    if (_state != WeighingState.Standby)
+                                    {
+                                        Log.AddLog(string.Concat("계량상태 변경 : ", _state.ToString(), " -> Standby"));
+
+                                        indicator.Stable = false;
+                                        _state = WeighingState.Standby;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Log.AddLog(string.Concat("Indicator 데이터 오류 - ", readData));
+                            }
+                        }
+                        else
+                        {
+                            Log.AddLog(string.Concat("Indicator 수신데이터 길이(", readData.Length.ToString(), ") 오류 - ", readData));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.AddLog(ex.Message);
+                }
+            }
+        }
+
+        private void vScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            DevExpress.XtraEditors.VScrollBar vsbar = (DevExpress.XtraEditors.VScrollBar)sender;
+            if (vsbar.Name.Contains("Item")) { Gv_Item.TopRowIndex = e.NewValue; }
+            else if (vsbar.Name.Contains("List")) { Gv_List.TopRowIndex = e.NewValue; }
+            else if (vsbar.Name.Contains("Car")) { Gv_Car.TopRowIndex = e.NewValue; }
+        }
+
+        private void Lk_ITCOD_Popup(object sender, EventArgs e)
+        {
+            //LookUpEdit edit = (LookUpEdit)sender;
+            //var form = edit.GetPopupEditForm();
+            //DevExpress.XtraEditors.VScrollBar scroll = form.Controls.OfType<DevExpress.XtraEditors.VScrollBar>().FirstOrDefault();
+            //scroll.ScrollBarAutoSize = false;
+            //scroll.Width = 40;
+            //edit.Properties.BestFitMode = DevExpress.XtraEditors.Controls.BestFitMode.BestFitResizePopup;
+        }
+
+        private void Lk_ITCOD_BeforePopup(object sender, EventArgs e)
+        {
+            LookUpEdit edit = (LookUpEdit)sender;
+            var form = edit.GetPopupEditForm();
+            DevExpress.XtraEditors.VScrollBar scroll = form.Controls.OfType<DevExpress.XtraEditors.VScrollBar>().FirstOrDefault();
+            scroll.ScrollBarAutoSize = false;
+            scroll.Width = 40;
+            edit.Properties.Columns[0].Visible = false;
+        }
+
+        private void panelProcess_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+
+    }
+}

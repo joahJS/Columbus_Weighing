@@ -1,0 +1,20 @@
+1. 설치 프로젝트 우클릭 > File system에서
+아래 파일들 추가하기
+
+★★★release폴더의 x86폴더에서 가져오기★★★
+OpenCvSharpExtern.dll
+opencv_ffmpeg400.dll
+
+release폴더에서 가져오기
+setting.ini
+vkb.dll
+
+바로가기용 아이콘 가져오기(그냥 기존 소스 폴더에 있음)
+TruckSacle.ico
+
+2. OpenCvSharp.dll이 두개가 참조되므로 하나 끄기
+
+2-1. 경로가 packages\OpenCvSharp.2.4.10\lib\OpenCvSharp.dll인 파일
+  >> 속성 창에서 Exclude를 True로 변경
+2-2. 경로가 packages\OpenCvSharp3-AnyCPU.4.0.0.20181129\lib\net461\OpenCvSharp.dll인 파일
+  >> 남기기(손대지 x)

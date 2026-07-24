@@ -1,0 +1,48 @@
+D:\PROJECT\Visual C#\DEAJIST\WeighingSystem\Popbill\bin\Release\Popbill.dll
+D:\PROJECT\Visual C#\DEAJIST\WeighingSystem\Popbill\bin\Release\Popbill.pdb
+D:\PROJECT\Visual C#\DEAJIST\WeighingSystem\Popbill\bin\Release\Linkhub.dll
+D:\PROJECT\Visual C#\DEAJIST\WeighingSystem\Popbill\bin\Release\Linkhub.pdb
+D:\PROJECT\Visual C#\DEAJIST\WeighingSystem\Popbill\obj\Release\Popbill.csprojResolveAssemblyReference.cache
+D:\PROJECT\Visual C#\DEAJIST\WeighingSystem\Popbill\obj\Release\Popbill.dll
+D:\PROJECT\Visual C#\DEAJIST\WeighingSystem\Popbill\obj\Release\Popbill.pdb
+D:\PROJECT\Visual C#\대지에스텍\WeighingSystem\Popbill\bin\Release\Popbill.dll
+D:\PROJECT\Visual C#\대지에스텍\WeighingSystem\Popbill\bin\Release\Popbill.pdb
+D:\PROJECT\Visual C#\대지에스텍\WeighingSystem\Popbill\bin\Release\Linkhub.dll
+D:\PROJECT\Visual C#\대지에스텍\WeighingSystem\Popbill\bin\Release\Linkhub.pdb
+D:\PROJECT\Visual C#\대지에스텍\WeighingSystem\Popbill\obj\Release\Popbill.csprojResolveAssemblyReference.cache
+D:\PROJECT\Visual C#\대지에스텍\WeighingSystem\Popbill\obj\Release\Popbill.dll
+D:\PROJECT\Visual C#\대지에스텍\WeighingSystem\Popbill\obj\Release\Popbill.pdb
+D:\PROJECT\Visual C#\대지에스텍\WeighingSystem_c1remove\Popbill\bin\Release\Popbill.dll
+D:\PROJECT\Visual C#\대지에스텍\WeighingSystem_c1remove\Popbill\bin\Release\Popbill.pdb
+D:\PROJECT\Visual C#\대지에스텍\WeighingSystem_c1remove\Popbill\bin\Release\Linkhub.dll
+D:\PROJECT\Visual C#\대지에스텍\WeighingSystem_c1remove\Popbill\bin\Release\Linkhub.pdb
+D:\PROJECT\Visual C#\대지에스텍\WeighingSystem_c1remove\Popbill\obj\Release\Popbill.csprojResolveAssemblyReference.cache
+D:\PROJECT\Visual C#\대지에스텍\WeighingSystem_c1remove\Popbill\obj\Release\Popbill.dll
+D:\PROJECT\Visual C#\대지에스텍\WeighingSystem_c1remove\Popbill\obj\Release\Popbill.pdb
+C:\Users\USER\Desktop\대지_무인계근_엔로비\WeighingSystem_c1remove\WeighingSystem_c1remove\Popbill\bin\Release\Popbill.dll
+C:\Users\USER\Desktop\대지_무인계근_엔로비\WeighingSystem_c1remove\WeighingSystem_c1remove\Popbill\bin\Release\Popbill.pdb
+C:\Users\USER\Desktop\대지_무인계근_엔로비\WeighingSystem_c1remove\WeighingSystem_c1remove\Popbill\bin\Release\Linkhub.dll
+C:\Users\USER\Desktop\대지_무인계근_엔로비\WeighingSystem_c1remove\WeighingSystem_c1remove\Popbill\bin\Release\Linkhub.pdb
+C:\Users\USER\Desktop\대지_무인계근_엔로비\WeighingSystem_c1remove\WeighingSystem_c1remove\Popbill\obj\Release\Popbill.csprojAssemblyReference.cache
+C:\Users\USER\Desktop\대지_무인계근_엔로비\WeighingSystem_c1remove\WeighingSystem_c1remove\Popbill\obj\Release\Popbill.csproj.CoreCompileInputs.cache
+C:\Users\USER\Desktop\대지_무인계근_엔로비\WeighingSystem_c1remove\WeighingSystem_c1remove\Popbill\obj\Release\Popbill.csproj.CopyComplete
+C:\Users\USER\Desktop\대지_무인계근_엔로비\WeighingSystem_c1remove\WeighingSystem_c1remove\Popbill\obj\Release\Popbill.dll
+C:\Users\USER\Desktop\대지_무인계근_엔로비\WeighingSystem_c1remove\WeighingSystem_c1remove\Popbill\obj\Release\Popbill.pdb
+G:\개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\bin\Release\Popbill.dll
+G:\개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\bin\Release\Popbill.pdb
+G:\개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\bin\Release\Linkhub.dll
+G:\개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\bin\Release\Linkhub.pdb
+G:\개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\obj\Release\Popbill.csprojAssemblyReference.cache
+G:\개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\obj\Release\Popbill.csproj.CoreCompileInputs.cache
+G:\개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\obj\Release\Popbill.csproj.CopyComplete
+G:\개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\obj\Release\Popbill.dll
+G:\개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\obj\Release\Popbill.pdb
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\bin\Release\Popbill.dll
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\bin\Release\Popbill.pdb
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\bin\Release\Linkhub.dll
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\bin\Release\Linkhub.pdb
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\obj\Release\Popbill.csprojAssemblyReference.cache
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\obj\Release\Popbill.csproj.CoreCompileInputs.cache
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\obj\Release\Popbill.csproj.CopyComplete
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\obj\Release\Popbill.dll
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\Popbill\obj\Release\Popbill.pdb

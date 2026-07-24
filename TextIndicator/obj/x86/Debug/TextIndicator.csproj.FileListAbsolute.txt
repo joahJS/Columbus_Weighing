@@ -1,0 +1,17 @@
+D:\PROJECT\Visual C#\CSP\CSPWeighingSystem\TextIndicator\bin\x86\Debug\TextIndicator.dll
+D:\PROJECT\Visual C#\CSP\CSPWeighingSystem\TextIndicator\bin\x86\Debug\TextIndicator.pdb
+D:\PROJECT\Visual C#\CSP\CSPWeighingSystem\TextIndicator\obj\x86\Debug\TextIndicator.Indicator.resources
+D:\PROJECT\Visual C#\CSP\CSPWeighingSystem\TextIndicator\obj\x86\Debug\TextIndicator.Properties.Resources.resources
+D:\PROJECT\Visual C#\CSP\CSPWeighingSystem\TextIndicator\obj\x86\Debug\TextIndicator.csproj.GenerateResource.Cache
+D:\PROJECT\Visual C#\CSP\CSPWeighingSystem\TextIndicator\obj\x86\Debug\TextIndicator.dll
+D:\PROJECT\Visual C#\CSP\CSPWeighingSystem\TextIndicator\obj\x86\Debug\TextIndicator.pdb
+D:\PROJECT\Visual C#\CSP\CSPWeighingSystem\TextIndicator\obj\x86\Debug\TextIndicator.csprojResolveAssemblyReference.cache
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\TextIndicator\bin\x86\Debug\TextIndicator.dll
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\TextIndicator\bin\x86\Debug\TextIndicator.pdb
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\TextIndicator\obj\x86\Debug\TextIndicator.csprojAssemblyReference.cache
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\TextIndicator\obj\x86\Debug\TextIndicator.Indicator.resources
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\TextIndicator\obj\x86\Debug\TextIndicator.Properties.Resources.resources
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\TextIndicator\obj\x86\Debug\TextIndicator.csproj.GenerateResource.cache
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\TextIndicator\obj\x86\Debug\TextIndicator.csproj.CoreCompileInputs.cache
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\TextIndicator\obj\x86\Debug\TextIndicator.dll
+G:\!개발\콜럼버스 무인계근_최신\Demo_weigh\Demo_weigh\TextIndicator\obj\x86\Debug\TextIndicator.pdb
