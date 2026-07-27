@@ -4774,7 +4774,7 @@ namespace WeighingSystem
                             }
 
 
-                            pictureBox14.Image = BitmapConverter.ToBitmap(frame1);
+                            CSafeSetImageBoxAndDispose(pictureBox14, BitmapConverter.ToBitmap(frame1));
                             Process pro = Process.GetCurrentProcess(); // 현재 프로세스 사용량
                             long memory = pro.VirtualMemorySize64;
 
@@ -4848,7 +4848,7 @@ namespace WeighingSystem
                                 continue;
                             }
 
-                            pictureBox13.Image = BitmapConverter.ToBitmap(frame2);
+                            CSafeSetImageBoxAndDispose(pictureBox13, BitmapConverter.ToBitmap(frame2));
                             Process pro = Process.GetCurrentProcess(); // 현재 프로세스 사용량
                             long memory = pro.VirtualMemorySize64;
 
@@ -4910,7 +4910,7 @@ namespace WeighingSystem
                                 continue;
                             }
 
-                            pictureBox12.Image = BitmapConverter.ToBitmap(frame3);
+                            CSafeSetImageBoxAndDispose(pictureBox12, BitmapConverter.ToBitmap(frame3));
                             Process pro = Process.GetCurrentProcess(); // 현재 프로세스 사용량
                             long memory = pro.VirtualMemorySize64;
 
@@ -4997,6 +4997,19 @@ namespace WeighingSystem
                 ctl.Invoke(new CrossThreadSafetySetImageBox(CSafeSetImageBox), ctl, img);
             else
                 ctl.Image = img;
+        }
+
+        // 이전 Image(GDI 핸들)를 UI 스레드에서 안전하게 교체 후 폐기 (핸들 누수 방지)
+        private void CSafeSetImageBoxAndDispose(PictureBox ctl, Image img)
+        {
+            if (ctl.InvokeRequired)
+                ctl.Invoke(new CrossThreadSafetySetImageBox(CSafeSetImageBoxAndDispose), ctl, img);
+            else
+            {
+                Image old = ctl.Image;
+                ctl.Image = img;
+                old?.Dispose();
+            }
         }
         delegate void CrossThreadSafetySetTextMemo(MemoEdit ctl, string str);
         private void CSafeSetmemoEdit(MemoEdit ctl, string str)
